@@ -93,7 +93,7 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 - [x] **User writes D1 and D3 in DECISIONS.md** (both written 25 Nov)
 **Commit(s):** `feat(server): atomic state, clock skew and idempotency` · `feat(server): cart reservations with TTL and atomic edit (TC-13..15)`
 
-## Step 7 — Checkout, orders, seed, export, Part E (≈1.5 h) — TC-16, 17 + D4, D6
+## ✅ Step 7 — Checkout, orders, seed, export, Part E (≈1.5 h) — TC-16, 17 + D4, D6
 - [x] `server/orders.ts` (`buildStoredOrder`), `checkout.ts`, `seed.ts`
 - [x] Tests:
   - [x] Pay twice with same key → 1 order, cart empty, sold counted once, expiry sweep does not release sold (TC-16)
@@ -103,12 +103,12 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 - [x] **User writes D4 and D6 in DECISIONS.md** (D6 must match `StoredOrder` type exactly)
 **Commit:** `feat(server): atomic checkout, persisted orders and priced seed (TC-16..17)`
 
-## Step 8 — MSW handlers + API client (≈1 h)
-- [ ] `mock/handlers.ts` (all endpoints from ARCHITECTURE §6, latency + chaos), `mock/browser.ts`, `mock/node.ts`
-- [ ] `main.tsx`: `await worker.start({ onUnhandledRequest: 'bypass' })` then render (bypass = Gemini calls go to the real internet)
-- [ ] `test/setup.ts`: start node server, latency 0, chaos off
-- [ ] `api/client.ts` (typed, `ApiError { status, code, body }`), `api/serverClock.ts`
-- [ ] Tests: client parses each endpoint; offset ≈ +90 s
+## ✅ Step 8 — MSW handlers + API client (≈1 h)
+- [x] `mock/handlers.ts` (all endpoints from ARCHITECTURE §6, latency + chaos), `mock/browser.ts`, `mock/node.ts`
+- [x] `main.tsx`: `await worker.start({ onUnhandledRequest: 'bypass' })` then render (bypass = Gemini calls go to the real internet)
+- [x] `test/setup.ts`: start node server, latency 0, chaos off
+- [x] `api/client.ts` (typed, `ApiError { status, code, body }`), `api/serverClock.ts`
+- [x] Tests: client parses each endpoint; offset ≈ +90 s
 **Commit:** `feat(api): msw handlers, typed client and server clock offset`
 
 ## Step 9 — Builder UI + price preview (≈2 h) — TC-12, TC-13, TC-14 (UI)
@@ -220,3 +220,4 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 25 Nov — D1 written by the user (409 OUT_OF_STOCK with shortages + amounts, edited config kept, fix and Save again, atomic recheck). Step 6 fully ticked. D1/D3 UI tasks added to Step 10. Next: Step 7.
 25 Nov 21:50 — Step 7 code done (D4, D6 open — user writes them). types/order.ts full StoredOrder (lineId/unit/lineTotal per line, coupon = CouponResult, totals, pricedAt, moneyUnit, currency from fixture, pricingWarnings); PAYMENT_METHODS in types. server/orders.ts (buildStoredOrder, ordersToJson = plain array), checkout.ts (checkout + getOrders; empties cart incl. expired items and coupon; 409 CART_EMPTY, 422 INVALID_PAYMENT_METHOD), seed.ts (normalizeSeedOrder drops unknown options with a warning; priced at createdAt; seed ids kept). readState() adds seed in memory; a GET never writes, first successful mutation saves seeded=true. recall() typed per op. TC-16, TC-17 green; 138 tests green.
 25 Nov 22:10 — D4 and D6 written by the user (D6 example = stored ORD-1006, generated from code). Step 7 fully ticked. Next: Step 8.
+25 Nov 22:25 — Step 8 done. server/menu.ts (getMenu), server/price.ts (pricePreview: chaos 503 PRICE_UNAVAILABLE, shared checkQuantity, unfinished config still priced + violations, unknown option → breakdown null). types/api.ts: PriceRequest, PriceBody, MenuBody, BAD_REQUEST, PRICE_UNAVAILABLE. mock/parse.ts (shape checks → 400), handlers.ts (all 10 endpoints, latency flag), browser.ts, node.ts. MSW 3: option is `onUnhandledFrame` (not onUnhandledRequest); handlers use plain Response.json. api/client.ts (ApiError status/code/body, NETWORK_ERROR = status 0, full URL for Node fetch), serverClock.ts. 153 tests green.

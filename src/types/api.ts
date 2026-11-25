@@ -1,7 +1,7 @@
 import type { CartItemView, CartView } from './cart'
-import type { Config, IngredientId, Shortage, Violation } from './menu'
+import type { Config, IngredientId, Menu, Poisha, Shortage, Violation } from './menu'
 import type { StoredOrder } from './order'
-import type { CartBreakdown } from './pricing'
+import type { CartBreakdown, UnitBreakdown } from './pricing'
 
 // What a mock-server function gives back. MSW turns it into an HTTP response (Step 8).
 export interface ServerResponse<Body> {
@@ -10,6 +10,13 @@ export interface ServerResponse<Body> {
 }
 
 // ---------- request bodies ----------
+
+// requestId comes back unchanged, so the browser can drop an old (stale) answer (TC-12).
+export interface PriceRequest {
+  requestId: string
+  config: Config
+  quantity: number
+}
 
 export interface AddItemRequest {
   idempotencyKey: string
@@ -30,6 +37,21 @@ export interface CheckoutRequest {
 }
 
 // ---------- success bodies (every one carries serverTime) ----------
+
+export interface MenuBody {
+  menu: Menu
+  serverTime: number
+}
+
+// breakdown is null when the config cannot be priced (e.g. min not met yet):
+// the violations say why.
+export interface PriceBody {
+  requestId: string
+  breakdown: UnitBreakdown | null
+  lineTotal: Poisha | null
+  violations: Violation[]
+  serverTime: number
+}
 
 export interface ItemBody {
   item: CartItemView
@@ -69,10 +91,12 @@ export interface OrdersBody {
 // ---------- errors ----------
 
 export type ErrorCode =
+  | 'BAD_REQUEST'
   | 'INVALID_CONFIG'
   | 'INVALID_QUANTITY'
   | 'OUT_OF_STOCK'
   | 'RESERVE_FAILED'
+  | 'PRICE_UNAVAILABLE'
   | 'NOT_FOUND'
   | 'EXPIRED'
   | 'VERSION_CONFLICT'

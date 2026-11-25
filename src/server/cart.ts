@@ -132,7 +132,8 @@ export function getCart(): ServerResponse<CartBody> {
 
 // ---------- checks (each throws a ServerError, so nothing gets saved) ----------
 
-function checkQuantity(quantity: number): void {
+// Also used by the price preview (price.ts), so both say the same thing.
+export function checkQuantity(quantity: number): void {
   const max = menu.shop.maxItemQuantity
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > max) {
     throw new ServerError(422, {
