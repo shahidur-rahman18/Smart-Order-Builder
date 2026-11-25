@@ -50,10 +50,10 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 **Done when:** tests green, the user can say in Bangla what each fixture field means.
 **Commit:** `feat(fixtures): add menu fixture in poisha and core types`
 
-## Step 2 — Money helpers + Checkpoint C1 (≈30 min)
-- [ ] **User writes C1 in DECISIONS.md first** (float risk with 679.50, VAT 75.48 by hand). Claude may only ask questions.
-- [ ] `src/engine/money.ts`: `roundHalfUp`, `percentOf`, `toWholeBdtPoisha`, `formatBdt`
-- [ ] Tests: `percentOf(150950, 5) === 7548`; `toWholeBdtPoisha(158498) === 158500`; `toWholeBdtPoisha(163748) === 163700`; x.5 cases; `0.1+0.2` float demo test (documents why)
+## ✅ Step 2 — Money helpers + Checkpoint C1 (≈30 min)
+- [x] **User writes C1 in DECISIONS.md first** (float risk with 679.50, VAT 75.48 by hand). Claude may only ask questions.
+- [x] `src/engine/money.ts`: `roundHalfUp`, `percentOf`, `toWholeBdtPoisha`, `formatBdt`
+- [x] Tests: `percentOf(150950, 5) === 7548`; `toWholeBdtPoisha(158498) === 158500`; `toWholeBdtPoisha(163748) === 163700`; x.5 cases; `0.1+0.2` float demo test (documents why)
 **Commit:** `feat(engine): integer poisha money helpers with half-up rounding`
 
 ## Step 3 — Rules engine, Part A (≈1.5 h) — TC-01…04
@@ -206,3 +206,4 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 25 Nov 15:45 — Step 0 done (except first commit). Smoke test green. Windows fix: `npm test` runs Vitest via scripts/vitest.mjs (upper-case drive letter, else Vitest loads twice). Root orders.seed.json still to move to src/fixtures in Step 1.
 25 Nov — Step 0 committed (ec0557f) and pushed to https://github.com/shahidur-rahman18/Smart-Order-Builder (main). Next: Step 1, only after user says go.
 25 Nov 16:45 — Step 1 done. Seed ids match ARCHITECTURE (sausage, bacon, hashbrown, beans); coupon field `couponCode` (string|null); paymentMethod card/bkash/cash; createdAt ISO with +06:00; line = { qty, options }. ORD-1001 = A, ORD-1002 = B, ORD-1003 line 1 = C. 12 tests green.
+25 Nov 17:15 — Step 2 done. money.ts (roundHalfUp integer-only, percentOf, toWholeBdtPoisha, formatBdt) + 17 tests; 29 tests green. C1 text drafted by Claude from the user's own four answers at the user's explicit request.
