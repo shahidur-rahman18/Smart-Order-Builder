@@ -64,11 +64,11 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 **Commit:** `feat(engine): generic validate() with group limits and cross-group rules (TC-01..04)`
 
 ## Step 4 — Pricing engine, Part C (≈1.5 h) — TC-05…07 + D2
-- [ ] `src/engine/time.ts` (`isStrictlyBefore`, `localDate`) + tests at 10:59:59 / 11:00:00 Dhaka
-- [ ] Write `tc05-07.pricing.test.ts` first
-- [ ] `src/engine/pricing.ts`: `priceUnit`, `priceCart` with full breakdown + coupon status
-- [ ] Unit tests: P2 with 3/4/6 extras; P1 boundary (eggs 3 vs 4 units, Omelette counts 1); tie → C1; coupon wrong code; coupon lowercase
-- [ ] Hand-check tests from ANSWERS: Q2 = 360.00, Q3 = 1040 / 1197
+- [x] `src/engine/time.ts` (`isStrictlyBefore`, `localDate`) + tests at 10:59:59 / 11:00:00 Dhaka
+- [x] Write `tc05-07.pricing.test.ts` first
+- [x] `src/engine/pricing.ts`: `priceUnit`, `priceCart` with full breakdown + coupon status
+- [x] Unit tests: P2 with 3/4/6 extras; P1 boundary (eggs 3 vs 4 units, Omelette counts 1); tie → C1; coupon wrong code; coupon lowercase
+- [x] Hand-check tests from ANSWERS: Q2 = 360.00, Q3 = 1040 / 1197
 - [ ] **User writes D2 in DECISIONS.md** (suggested: lock at checkout)
 **Commit:** `feat(engine): priceCart with promotions, cart discount and VAT (TC-05..07)`
 
@@ -208,3 +208,4 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 25 Nov 16:45 — Step 1 done. Seed ids match ARCHITECTURE (sausage, bacon, hashbrown, beans); coupon field `couponCode` (string|null); paymentMethod card/bkash/cash; createdAt ISO with +06:00; line = { qty, options }. ORD-1001 = A, ORD-1002 = B, ORD-1003 line 1 = C. 12 tests green.
 25 Nov 17:15 — Step 2 done. money.ts (roundHalfUp integer-only, percentOf, toWholeBdtPoisha, formatBdt) + 17 tests; 29 tests green. C1 text drafted by Claude from the user's own four answers at the user's explicit request.
 25 Nov 18:30 — Step 3 done in 3 parts. validate.ts (group limits, overrideLimit smallest-wins, requires, excludes, unknown option kind 'unknown' added to Violation). TC-01…04 green; 48 tests green. User to write the 'unknown' decision in DECISIONS extras later.
+25 Nov 18:40 — Step 4 code done (D2 still open, user writes it). time.ts + pricing.ts; UnitBreakdown fields named `cheapestFree`/`combo` (not p2/p1, so no promo ids in engine code); priceCart takes optional 5th arg couponCode (SPEC lists 4). TC-05…07 + Q2/Q3 hand checks green; 75 tests green.

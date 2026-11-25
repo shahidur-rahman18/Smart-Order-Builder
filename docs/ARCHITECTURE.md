@@ -215,7 +215,7 @@ export interface CartLineInput { id: string; config: Config; quantity: number }
 - **Edit (net difference):** `availableForEdit = available + usageOf(oldItem.config, oldItem.quantity)` — only the item's own allocation is added back, so it can never release more than it holds.
 
 ### pricing.ts
-- `priceUnit(config, menu): UnitBreakdown` → `{ base, optionsTotal, step1, p2: { freeUnits, discount }, step2, p1: { applied, discount }, unitPrice }`
+- `priceUnit(config, menu): UnitBreakdown` → `{ base, optionsTotal, step1, cheapestFree: { freeUnits, discount }, step2, combo: { applied, discount }, unitPrice }` (field names follow promo *type*, not promo id)
   - P2: list every extra *unit* (option repeated qty times) sorted by price ascending; free = sum of the cheapest `floor(units / every)`.
   - P1: if every condition's group-unit total ≥ `minUnits` → `discount = percentOf(step2, percent)`; `unitPrice = step2 − discount`.
 - `priceCart(cart: CartLineInput[], menu, promos, serverTime, couponCode?: string | null): CartBreakdown`
