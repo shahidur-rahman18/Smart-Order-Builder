@@ -17,7 +17,7 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 
 ---
 
-## Step 0 — Bootstrap (≈30 min)
+## ✅ Step 0 — Bootstrap (≈30 min)
 **Goal:** a running Vite + React + TS app with Tailwind, Vitest, MSW and git.
 - [x] Project was created by the user with `npm create vite@latest smart-order-builder -- --template react-ts` and these docs were copied in (see START-HERE.md).
 - [x] `npm install`
@@ -32,20 +32,20 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 - [x] `.env.example` with `VITE_GEMINI_API_KEY=`
 - [x] Remove Vite demo content; `App.tsx` shows "Smart Order Builder" in a Tailwind-styled header
 - [x] One smoke test `src/App.test.tsx` renders the title
-- [ ] `git init` (done), first commit after the user says "commit"
+- [x] `git init`, first commit (ec0557f) + pushed to origin/main
 
 **Done when:** `npm run dev` shows the header, `npm test` passes 1 test, `npm run typecheck` is clean.
 **Commit:** `chore: bootstrap vite react-ts with tailwind, vitest, msw`
 
-## Step 1 — Fixture, types, seed inspection (≈1 h)
+## ✅ Step 1 — Fixture, types, seed inspection (≈1 h)
 **Goal:** the menu as data + shared types.
-- [ ] User saves the downloaded `orders.seed.json` to `src/fixtures/orders.seed.json` (unchanged)
-- [ ] **Read the seed file first.** Write down (in the step summary) the exact option ids, coupon field name, payment values, createdAt format, line/quantity shape
-- [ ] `src/fixtures/menu.json` per ARCHITECTURE §3, **ids matching the seed file**, money in poisha
-- [ ] `src/types/*.ts` per ARCHITECTURE §4
-- [ ] `src/engine/menuIndex.ts` (lookups + duplicate-id check)
-- [ ] `src/test/builders.ts`: `configByNames({ Toast: 1, Scrambled: 2, ... })` → Config; `configA/B/C()`
-- [ ] Tests: fixture loads; ids unique; every rule/promo references existing ids; builders produce A/B/C
+- [x] User saves the downloaded `orders.seed.json` to `src/fixtures/orders.seed.json` (unchanged)
+- [x] **Read the seed file first.** Write down (in the step summary) the exact option ids, coupon field name, payment values, createdAt format, line/quantity shape
+- [x] `src/fixtures/menu.json` per ARCHITECTURE §3, **ids matching the seed file**, money in poisha
+- [x] `src/types/*.ts` per ARCHITECTURE §4
+- [x] `src/engine/menuIndex.ts` (lookups + duplicate-id check)
+- [x] `src/test/builders.ts`: `configByNames({ Toast: 1, Scrambled: 2, ... })` → Config; `configA/B/C()`
+- [x] Tests: fixture loads; ids unique; every rule/promo references existing ids; builders produce A/B/C
 
 **Done when:** tests green, the user can say in Bangla what each fixture field means.
 **Commit:** `feat(fixtures): add menu fixture in poisha and core types`
@@ -204,3 +204,5 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 ## Session log
 <!-- Claude: one line per session, e.g. "25 Nov 16:10 — Step 1 done, TC none yet, seed ids: sausage, bacon …" -->
 25 Nov 15:45 — Step 0 done (except first commit). Smoke test green. Windows fix: `npm test` runs Vitest via scripts/vitest.mjs (upper-case drive letter, else Vitest loads twice). Root orders.seed.json still to move to src/fixtures in Step 1.
+25 Nov — Step 0 committed (ec0557f) and pushed to https://github.com/shahidur-rahman18/Smart-Order-Builder (main). Next: Step 1, only after user says go.
+25 Nov 16:45 — Step 1 done. Seed ids match ARCHITECTURE (sausage, bacon, hashbrown, beans); coupon field `couponCode` (string|null); paymentMethod card/bkash/cash; createdAt ISO with +06:00; line = { qty, options }. ORD-1001 = A, ORD-1002 = B, ORD-1003 line 1 = C. 12 tests green.

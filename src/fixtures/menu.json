@@ -1,0 +1,100 @@
+{
+  "product": { "id": "breakfast", "name": "Build Your Breakfast", "basePrice": 25000 },
+  "shop": {
+    "timeZone": "Asia/Dhaka",
+    "currency": "BDT",
+    "vatPercent": 5,
+    "reservationTtlSeconds": 300,
+    "maxItemQuantity": 3,
+    "cartDiscountTieBreak": ["C1", "C2"]
+  },
+  "ingredients": [
+    { "id": "egg", "name": "egg" },
+    { "id": "sausage", "name": "sausage" },
+    { "id": "bacon", "name": "bacon" },
+    { "id": "tofu", "name": "tofu" },
+    { "id": "croissant", "name": "croissant" },
+    { "id": "paratha", "name": "paratha" },
+    { "id": "toast", "name": "toast" },
+    { "id": "hashbrown", "name": "hash brown" },
+    { "id": "mushroom", "name": "mushroom" },
+    { "id": "beans", "name": "baked beans" },
+    { "id": "cheese", "name": "cheese" },
+    { "id": "hollandaise", "name": "hollandaise" }
+  ],
+  "stock": {
+    "egg": 10,
+    "sausage": 4,
+    "bacon": 3,
+    "tofu": 5,
+    "croissant": 2,
+    "paratha": 10,
+    "toast": 20,
+    "hashbrown": 6,
+    "mushroom": 6,
+    "beans": 8,
+    "cheese": 4,
+    "hollandaise": 5
+  },
+  "groups": [
+    {
+      "id": "bread", "name": "Bread", "min": 1, "max": 1,
+      "options": [
+        { "id": "toast", "name": "Toast", "price": 0, "uses": { "toast": 1 } },
+        { "id": "paratha", "name": "Paratha", "price": 2000, "uses": { "paratha": 1 } },
+        { "id": "croissant", "name": "Croissant", "price": 6000, "uses": { "croissant": 1 } }
+      ]
+    },
+    {
+      "id": "eggs", "name": "Eggs", "min": 2, "max": 6, "step": 2,
+      "options": [
+        { "id": "fried", "name": "Fried", "price": 3000, "uses": { "egg": 1 } },
+        { "id": "scrambled", "name": "Scrambled", "price": 3500, "uses": { "egg": 1 } },
+        { "id": "omelette", "name": "Omelette", "price": 7000, "uses": { "egg": 2 } }
+      ]
+    },
+    {
+      "id": "protein", "name": "Protein", "min": 1, "max": 3,
+      "options": [
+        { "id": "sausage", "name": "Chicken Sausage", "price": 6000, "uses": { "sausage": 1 } },
+        { "id": "bacon", "name": "Beef Bacon", "price": 9000, "uses": { "bacon": 1 } },
+        { "id": "tofu", "name": "Tofu", "price": 5000, "uses": { "tofu": 1 } }
+      ]
+    },
+    {
+      "id": "extras", "name": "Extras", "min": 0, "max": 4,
+      "options": [
+        { "id": "hashbrown", "name": "Hash Brown", "price": 4000, "uses": { "hashbrown": 1 } },
+        { "id": "mushroom", "name": "Mushroom", "price": 3000, "uses": { "mushroom": 1 } },
+        { "id": "beans", "name": "Baked Beans", "price": 2500, "uses": { "beans": 1 } },
+        { "id": "cheese", "name": "Cheese", "price": 3500, "uses": { "cheese": 1 } }
+      ]
+    },
+    {
+      "id": "sauce", "name": "Sauce", "min": 0, "maxDistinct": 2, "maxPerOption": 1,
+      "options": [
+        { "id": "ketchup", "name": "Ketchup", "price": 0, "uses": {} },
+        { "id": "hollandaise", "name": "Hollandaise", "price": 2500, "uses": { "hollandaise": 1 } },
+        { "id": "chili", "name": "Chili", "price": 1000, "uses": {} }
+      ]
+    }
+  ],
+  "rules": [
+    { "id": "R1", "type": "requires", "option": "hollandaise", "anyOf": ["scrambled", "omelette"] },
+    { "id": "R2", "type": "excludes", "option": "tofu", "with": ["sausage", "bacon"] },
+    { "id": "R3", "type": "overrideLimit", "option": "croissant", "group": "extras", "max": 2 },
+    { "id": "R4", "type": "excludes", "option": "chili", "with": ["hollandaise"] }
+  ],
+  "promotions": [
+    { "id": "P2", "type": "cheapestFree", "group": "extras", "every": 3 },
+    {
+      "id": "P1", "type": "comboPercent", "percent": 10,
+      "conditions": [
+        { "group": "eggs", "minUnits": 4 },
+        { "group": "protein", "minUnits": 2 }
+      ]
+    },
+    { "id": "C1", "type": "cartFixed", "minSubtotal": 120000, "amount": 10000 },
+    { "id": "C2", "type": "couponPercent", "code": "MORNING15", "percent": 15, "cap": 15000, "validBefore": "11:00" }
+  ]
+}
