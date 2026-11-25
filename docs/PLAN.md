@@ -82,7 +82,7 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 **Done when:** TC-01…11 all green, hardcode check clean. **End of day 1.**
 **Commit:** `feat(engine): ingredient stock, shortages and edit net difference (TC-08..11)`
 
-## Step 6 — Mock server: cart & reservations, Part D (≈2 h) — TC-13…15 (server level) + D1, D3
+## ✅ Step 6 — Mock server: cart & reservations, Part D (≈2 h) — TC-13…15 (server level) + D1, D3
 - [x] `server/clock.ts`, `chaos.ts`, `storage.ts`, `state.ts (withState)`, `idempotency.ts`, `stockView.ts`, `cart.ts`
 - [x] Tests (server functions directly):
   - [x] same idempotency key ×3 → 1 item (TC-13)
@@ -90,7 +90,7 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
   - [x] item expires at server `createdAt + 300 s` with 90 s skew; stock released; edit → 410 (TC-15)
   - [x] TC-08…11 again through `cart.ts` (409 with shortages)
   - [x] two "tabs" = two calls on the same localStorage: tab B takes eggs, tab A's edit → 409 with fresh `available` (D1)
-- [ ] **User writes D1 and D3 in DECISIONS.md**
+- [x] **User writes D1 and D3 in DECISIONS.md** (both written 25 Nov)
 **Commit(s):** `feat(server): atomic state, clock skew and idempotency` · `feat(server): cart reservations with TTL and atomic edit (TC-13..15)`
 
 ## Step 7 — Checkout, orders, seed, export, Part E (≈1.5 h) — TC-16, 17 + D4, D6
@@ -124,6 +124,10 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 ## Step 10 — Cart UI, edit, checkout, orders page (≈2 h) — TC-15…17 (UI)
 - [ ] `useCart`, `useCountdown` (server time), `useOrders`
 - [ ] Cart panel: countdown, expired read-only, Remove, Edit → builder edit mode (net headroom), D1/D3 behaviour exactly as written in DECISIONS
+  - [ ] D3: on expiry (serverNow countdown hits 0, or PUT → 410 `EXPIRED`) the edited config stays in the builder, Save disabled with an expiry message, cart item marked "Expired" (Remove only), "Add as new item" button = POST with a new idempotency key (409 → show shortages, config kept)
+  - [ ] D1: edit Save → 409 `OUT_OF_STOCK` → builder shows every shortage with amounts (and fresh `available` as `+N left`), edited config kept, user changes selection and Saves again
+  - [ ] RTL test for D1: other "tab" takes the eggs → Save → shortage message, config still on screen, reduce eggs → Save succeeds
+  - [ ] RTL test for D3: edit open → time passes past expiry → Save disabled + message, config still on screen, "Add as new item" adds a new item
 - [ ] Coupon input, totals breakdown (subtotal, each discount + why not, VAT, payable), payment select, Pay (idempotent, disabled while pending)
 - [ ] Orders tab + Download orders.json
 - [ ] Dev tools footer: "Fail next reserve", "Reset demo data"
@@ -212,3 +216,5 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 25 Nov 19:20 — Step 5 done. stock.ts (usageOf, sum/subtractUsage, availableStock(menu, soldLines, reservedLines) clamped at 0, availableForEdit, shortagesFor, formatShortages, optionHeadroom). availableStock takes lines, not usage (small change from ARCHITECTURE). menu.alt.json (burger, London time) passes validate/price/stock. check-hardcode.mjs: string literals + .id / id: keys, comments ignored; clean. TC-01…11 green; 103 tests green. D2 still open (user).
 25 Nov 19:45 — Step 6 code done (D1, D3 open — user writes them; D2 also still open). server/: clock, chaos, storage (loadState → null on broken/old data), state (withState = load→work→save), idempotency (key namespaced by op, failures not remembered, replay refreshes serverTime), http (ServerError + respond), stockView, cart. Edit keeps original expiresAt; 409 on edit returns availableForEdit. types/api.ts, cart.ts, order.ts (minimal StoredOrder, Step 7 extends). 125 tests green.
 25 Nov 20:10 — D2 written by the user (lock at Pay; cart re-priced at server time; coupon-ends-at-11 message in cart UI, Step 10). Step 4 fully ticked.
+25 Nov — D3 written by the user in DECISIONS (option খ): unsaved edit is kept on screen; on expiry (serverNow countdown or 410 EXPIRED) Save is disabled with reason "Reservation expired. Stock was released."; old cart item shows Expired, Remove only; "Add as new item" = normal POST with new idempotency key and fresh stock check (409 shortages keep the config). UI work in Step 10.
+25 Nov — D1 written by the user (409 OUT_OF_STOCK with shortages + amounts, edited config kept, fix and Save again, atomic recheck). Step 6 fully ticked. D1/D3 UI tasks added to Step 10. Next: Step 7.

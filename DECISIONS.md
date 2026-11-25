@@ -21,14 +21,16 @@ Payable = 150950 + 7548 = 158498 poisha = BDT 1584.98. `toWholeBdtPoisha(158498)
 | | | | |
 
 ## ◆ D1 — Two tabs, last eggs taken while editing
-<!-- Think about: What does the server answer (status + shortages)? What does tab A show? Is the typed config kept? Can the user fix it and save again? -->
+When Tab B takes the last available eggs, Tab A's save must fail with a `409 OUT_OF_STOCK` because the stock has changed. The screen shows which ingredients are short and by how much, but all the user's unsaved changes remain intact. The user can update their selection and try saving again. The server rechecks stock atomically to prevent overselling.
 
 ## ◆ D2 — When is a price locked?
 <!-- Think about: Add to cart vs checkout vs never. How does TC-06 (10:59:59) vs TC-07 (11:00:00) behave with your choice? What does the cart show before Pay? -->
 I lock the price when the user clicks Pay, not when the item goes into the cart. It is like a shop counter: you get the offer that is running when you pay. So if someone adds an item at 10:58 and pays at 11:02, they don't get MORNING15, because the coupon only works before 11:00 (TC-06, TC-07). This means the cart price can change, so I show a small message in the cart that the coupon ends at 11. I always use the server clock, because browser time can be different on every device.
 
 ## ◆ D3 — Reservation expires during an edit
-<!-- Think about: Are unsaved changes kept? What message appears? What can the user do next (e.g. add as a new item)? Why is the old item read-only? -->
+If a reservation expires while the user is editing, their changes stay on screen, but Save is disabled and an expiry message appears. The countdown uses server time, and the server returns `410 EXPIRED` to prevent further edits.
+
+In the cart, the item is marked "Expired" and can only be removed. The user can choose "Add as new item" to check stock again; if stock is available, the item is added, otherwise the shortage is shown.
 
 ## ◆ D4 — Order id/timestamp and double-click on Pay
 <!-- Think about: Why should the server (not the browser) create the id and createdAt? How does the idempotency key work? What else stops the second click? -->
