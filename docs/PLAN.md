@@ -111,14 +111,14 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 - [x] Tests: client parses each endpoint; offset ≈ +90 s
 **Commit:** `feat(api): msw handlers, typed client and server clock offset`
 
-## Step 9 — Builder UI + price preview (≈2 h) — TC-12, TC-13, TC-14 (UI)
-- [ ] hooks: `useMenu`, `useStock`, `useDebouncedValue`, `usePricePreview`
-- [ ] components/builder/*: groups from menu, qty steppers, `+N left`, disabled reasons, violations list, price preview with Retry, quantity 1–3, Add to cart
-- [ ] RTL tests:
-  - [ ] TC-12: two configs, first response slower → only the second price shows
-  - [ ] TC-13: triple click → one POST effect / one cart item
-  - [ ] TC-14: reserve 503 → selection still on screen, Retry → item added
-  - [ ] Add disabled while violations exist (TC-01 via UI)
+## ✅ Step 9 — Builder UI + price preview (≈2 h) — TC-12, TC-13, TC-14 (UI)
+- [x] hooks: `useMenu`, `useStock`, `useDebouncedValue`, `usePricePreview`
+- [x] components/builder/*: groups from menu, qty steppers, `+N left`, disabled reasons, violations list, price preview with Retry, quantity 1–3, Add to cart
+- [x] RTL tests:
+  - [x] TC-12: two configs, first response slower → only the second price shows
+  - [x] TC-13: triple click → one POST effect / one cart item
+  - [x] TC-14: reserve 503 → selection still on screen, Retry → item added
+  - [x] Add disabled while violations exist (TC-01 via UI)
 **Commit:** `feat(ui): data-driven builder with debounced price preview (TC-12..14)`
 
 ## Step 10 — Cart UI, edit, checkout, orders page (≈2 h) — TC-15…17 (UI)
@@ -221,3 +221,4 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 25 Nov 21:50 — Step 7 code done (D4, D6 open — user writes them). types/order.ts full StoredOrder (lineId/unit/lineTotal per line, coupon = CouponResult, totals, pricedAt, moneyUnit, currency from fixture, pricingWarnings); PAYMENT_METHODS in types. server/orders.ts (buildStoredOrder, ordersToJson = plain array), checkout.ts (checkout + getOrders; empties cart incl. expired items and coupon; 409 CART_EMPTY, 422 INVALID_PAYMENT_METHOD), seed.ts (normalizeSeedOrder drops unknown options with a warning; priced at createdAt; seed ids kept). readState() adds seed in memory; a GET never writes, first successful mutation saves seeded=true. recall() typed per op. TC-16, TC-17 green; 138 tests green.
 25 Nov 22:10 — D4 and D6 written by the user (D6 example = stored ORD-1006, generated from code). Step 7 fully ticked. Next: Step 8.
 25 Nov 22:25 — Step 8 done. server/menu.ts (getMenu), server/price.ts (pricePreview: chaos 503 PRICE_UNAVAILABLE, shared checkQuantity, unfinished config still priced + violations, unknown option → breakdown null). types/api.ts: PriceRequest, PriceBody, MenuBody, BAD_REQUEST, PRICE_UNAVAILABLE. mock/parse.ts (shape checks → 400), handlers.ts (all 10 endpoints, latency flag), browser.ts, node.ts. MSW 3: option is `onUnhandledFrame` (not onUnhandledRequest); handlers use plain Response.json. api/client.ts (ApiError status/code/body, NETWORK_ERROR = status 0, full URL for Node fetch), serverClock.ts. 153 tests green.
+25 Nov 22:50 — Step 9 done. hooks: useMenu, useStock (5 s + focus + after add), useDebouncedValue, usePricePreview (abort + requestId check; status derived, no setState in effect), extra useAddToCart (key per draft in useRef, pendingRef blocks triple click, 503/network → Retry with same key). components/builder: Builder, GroupSection (hint from group limits), OptionRow (+N left / ∞ / Out of stock, aria-label "<name> quantity"), ViolationList, PricePreview (stale greyed, Retry price), QuantityPicker. App loads menu. After success the draft resets. TC-12, 13, 14 + TC-01 UI green; 158 tests green. 375px not yet checked by eye.
