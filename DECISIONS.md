@@ -7,8 +7,11 @@
 -->
 
 ## ✋ C1 — Why not floats, and how VAT 75.48 is rounded
-<!-- Think about: What is 0.1 + 0.2 in JS? Where in TC-06 do many small additions/percentages happen?
-     Write the VAT step by hand in poisha: discounted subtotal → × 5% → which half-up rule → 7548. Then payable → 1585. -->
+Decimal numbers in JS are not exact, for example `0.1 + 0.2` gives `0.30000000000000004`. These small errors add up over line totals, discounts and VAT, and can make the payable amount wrong and cause payment problems. So I keep all money as whole numbers in poisha (1 BDT = 100 poisha), for example BDT 679.50 is stored as `67950`.
+
+VAT in TC-06: the discounted subtotal is 150950 poisha. 150950 × 5 = 754750, and 754750 / 100 = 7547.50 poisha. I round half up (.5 or more goes up), so it becomes 7548 poisha = BDT 75.48. This is done by `percentOf()`, which calls `roundHalfUp()` in `src/engine/money.ts`. It uses only integer math, `Math.floor((2 × 754750 + 100) / 200) = 7548`, so no decimal number is created on the way.
+
+Payable = 150950 + 7548 = 158498 poisha = BDT 1584.98. `toWholeBdtPoisha(158498)` rounds it to the nearest whole taka: 158500 poisha = BDT 1585.
 
 ## ✋ C2 — Bot questions → functions
 <!-- A table: question | function name | inputs | output. Must match src/assistant/tools.ts exactly. -->
