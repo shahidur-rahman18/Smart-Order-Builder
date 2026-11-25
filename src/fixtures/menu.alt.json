@@ -1,0 +1,58 @@
+{
+  "product": { "id": "burger", "name": "Build Your Burger", "basePrice": 30000 },
+  "shop": {
+    "timeZone": "Europe/London",
+    "currency": "BDT",
+    "vatPercent": 10,
+    "reservationTtlSeconds": 120,
+    "maxItemQuantity": 5,
+    "cartDiscountTieBreak": ["F1", "Q1"]
+  },
+  "ingredients": [
+    { "id": "bun", "name": "bun" },
+    { "id": "patty", "name": "patty" },
+    { "id": "lettuce", "name": "lettuce" },
+    { "id": "cheddar", "name": "cheddar" }
+  ],
+  "stock": { "bun": 3, "patty": 4, "lettuce": 10, "cheddar": 2 },
+  "groups": [
+    {
+      "id": "buns", "name": "Bun", "min": 1, "max": 1,
+      "options": [
+        { "id": "plain", "name": "Plain Bun", "price": 0, "uses": { "bun": 1 } },
+        { "id": "brioche", "name": "Brioche", "price": 5000, "uses": { "bun": 1 } }
+      ]
+    },
+    {
+      "id": "patties", "name": "Patty", "min": 1, "max": 2,
+      "options": [
+        { "id": "beef", "name": "Beef Patty", "price": 12000, "uses": { "patty": 1 } },
+        { "id": "chickpea", "name": "Chickpea Patty", "price": 9000, "uses": {} }
+      ]
+    },
+    {
+      "id": "toppings", "name": "Toppings", "min": 0, "max": 3,
+      "options": [
+        { "id": "lettuce", "name": "Lettuce", "price": 1000, "uses": { "lettuce": 1 } },
+        { "id": "cheddar", "name": "Cheddar", "price": 3000, "uses": { "cheddar": 1 } },
+        { "id": "pickles", "name": "Pickles", "price": 500, "uses": {} }
+      ]
+    }
+  ],
+  "rules": [
+    { "id": "X1", "type": "requires", "option": "cheddar", "anyOf": ["beef"] },
+    { "id": "X2", "type": "overrideLimit", "option": "brioche", "group": "toppings", "max": 2 }
+  ],
+  "promotions": [
+    { "id": "T1", "type": "cheapestFree", "group": "toppings", "every": 2 },
+    {
+      "id": "K1", "type": "comboPercent", "percent": 20,
+      "conditions": [
+        { "group": "patties", "minUnits": 2 },
+        { "group": "toppings", "minUnits": 2 }
+      ]
+    },
+    { "id": "F1", "type": "cartFixed", "minSubtotal": 50000, "amount": 5000 },
+    { "id": "Q1", "type": "couponPercent", "code": "LUNCH10", "percent": 10, "cap": 3000, "validBefore": "14:00" }
+  ]
+}
