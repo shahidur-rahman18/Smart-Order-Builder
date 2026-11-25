@@ -56,11 +56,11 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 - [x] Tests: `percentOf(150950, 5) === 7548`; `toWholeBdtPoisha(158498) === 158500`; `toWholeBdtPoisha(163748) === 163700`; x.5 cases; `0.1+0.2` float demo test (documents why)
 **Commit:** `feat(engine): integer poisha money helpers with half-up rounding`
 
-## Step 3 — Rules engine, Part A (≈1.5 h) — TC-01…04
-- [ ] Write `src/test/acceptance/tc01-04.rules.test.ts` first (fails)
-- [ ] `src/engine/validate.ts` per ARCHITECTURE §5
-- [ ] Extra unit tests: Scrambled x1 + Fried x1 valid; maxDistinct; maxPerOption; min; unknown option; override with no selection = base max
-- [ ] TC-04: Tofu + Bacon + Chili + Hollandaise → **both** excludes violations listed
+## ✅ Step 3 — Rules engine, Part A (≈1.5 h) — TC-01…04
+- [x] Write `src/test/acceptance/tc01-04.rules.test.ts` first (fails)
+- [x] `src/engine/validate.ts` per ARCHITECTURE §5
+- [x] Extra unit tests: Scrambled x1 + Fried x1 valid; maxDistinct; maxPerOption; min; unknown option; override with no selection = base max
+- [x] TC-04: Tofu + Bacon + Chili + Hollandaise → **both** excludes violations listed
 **Commit:** `feat(engine): generic validate() with group limits and cross-group rules (TC-01..04)`
 
 ## Step 4 — Pricing engine, Part C (≈1.5 h) — TC-05…07 + D2
@@ -207,3 +207,4 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 25 Nov — Step 0 committed (ec0557f) and pushed to https://github.com/shahidur-rahman18/Smart-Order-Builder (main). Next: Step 1, only after user says go.
 25 Nov 16:45 — Step 1 done. Seed ids match ARCHITECTURE (sausage, bacon, hashbrown, beans); coupon field `couponCode` (string|null); paymentMethod card/bkash/cash; createdAt ISO with +06:00; line = { qty, options }. ORD-1001 = A, ORD-1002 = B, ORD-1003 line 1 = C. 12 tests green.
 25 Nov 17:15 — Step 2 done. money.ts (roundHalfUp integer-only, percentOf, toWholeBdtPoisha, formatBdt) + 17 tests; 29 tests green. C1 text drafted by Claude from the user's own four answers at the user's explicit request.
+25 Nov 18:30 — Step 3 done in 3 parts. validate.ts (group limits, overrideLimit smallest-wins, requires, excludes, unknown option kind 'unknown' added to Violation). TC-01…04 green; 48 tests green. User to write the 'unknown' decision in DECISIONS extras later.

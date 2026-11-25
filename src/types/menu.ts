@@ -66,7 +66,15 @@ export type Config = Record<OptionId, number>
 
 export interface Violation {
   id: string
-  kind: 'min' | 'max' | 'step' | 'maxDistinct' | 'maxPerOption' | 'requires' | 'excludes'
+  kind:
+    | 'min'
+    | 'max'
+    | 'step'
+    | 'maxDistinct'
+    | 'maxPerOption'
+    | 'requires'
+    | 'excludes'
+    | 'unknown' // config names an option id that is not on the menu
   message: string
 }
 
