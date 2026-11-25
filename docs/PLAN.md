@@ -72,13 +72,13 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 - [ ] **User writes D2 in DECISIONS.md** (suggested: lock at checkout)
 **Commit:** `feat(engine): priceCart with promotions, cart discount and VAT (TC-05..07)`
 
-## Step 5 — Stock engine, Part B (≈1.5 h) — TC-08…11
-- [ ] Write `tc08-11.stock.test.ts` first (pure engine level; server-level versions come in Step 6)
-- [ ] `src/engine/stock.ts` per ARCHITECTURE §5 (usage, available, shortages, headroom, edit net difference)
-- [ ] TC-08 includes: a new item needing eggs → shortage reason "Short: 2 egg"
-- [ ] TC-10 also checks B's new unit price 643.50
-- [ ] `src/fixtures/menu.alt.json` + `engine/alt-fixture.test.ts`: validate/price/stock work on the other menu
-- [ ] `scripts/check-hardcode.mjs`: reads ids + names from `menu.json`, greps `src/engine src/server src/components src/hooks src/assistant` (skip `*.test.*`), exits 1 if found
+## ✅ Step 5 — Stock engine, Part B (≈1.5 h) — TC-08…11
+- [x] Write `tc08-11.stock.test.ts` first (pure engine level; server-level versions come in Step 6)
+- [x] `src/engine/stock.ts` per ARCHITECTURE §5 (usage, available, shortages, headroom, edit net difference)
+- [x] TC-08 includes: a new item needing eggs → shortage reason "Short: 2 egg"
+- [x] TC-10 also checks B's new unit price 643.50
+- [x] `src/fixtures/menu.alt.json` + `engine/alt-fixture.test.ts`: validate/price/stock work on the other menu
+- [x] `scripts/check-hardcode.mjs`: reads ids + names from `menu.json`, greps `src/engine src/server src/components src/hooks src/assistant` (skip `*.test.*`), exits 1 if found
 **Done when:** TC-01…11 all green, hardcode check clean. **End of day 1.**
 **Commit:** `feat(engine): ingredient stock, shortages and edit net difference (TC-08..11)`
 
@@ -209,3 +209,4 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 25 Nov 17:15 — Step 2 done. money.ts (roundHalfUp integer-only, percentOf, toWholeBdtPoisha, formatBdt) + 17 tests; 29 tests green. C1 text drafted by Claude from the user's own four answers at the user's explicit request.
 25 Nov 18:30 — Step 3 done in 3 parts. validate.ts (group limits, overrideLimit smallest-wins, requires, excludes, unknown option kind 'unknown' added to Violation). TC-01…04 green; 48 tests green. User to write the 'unknown' decision in DECISIONS extras later.
 25 Nov 18:40 — Step 4 code done (D2 still open, user writes it). time.ts + pricing.ts; UnitBreakdown fields named `cheapestFree`/`combo` (not p2/p1, so no promo ids in engine code); priceCart takes optional 5th arg couponCode (SPEC lists 4). TC-05…07 + Q2/Q3 hand checks green; 75 tests green.
+25 Nov 19:20 — Step 5 done. stock.ts (usageOf, sum/subtractUsage, availableStock(menu, soldLines, reservedLines) clamped at 0, availableForEdit, shortagesFor, formatShortages, optionHeadroom). availableStock takes lines, not usage (small change from ARCHITECTURE). menu.alt.json (burger, London time) passes validate/price/stock. check-hardcode.mjs: string literals + .id / id: keys, comments ignored; clean. TC-01…11 green; 103 tests green. D2 still open (user).
