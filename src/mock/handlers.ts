@@ -2,6 +2,7 @@ import { delay, http } from 'msw'
 import { addItem, editItem, getCart, removeItem, setCoupon } from '../server/cart'
 import { checkout, getOrders } from '../server/checkout'
 import { serverNow } from '../server/clock'
+import { devFailNextReserve, devReset } from '../server/dev'
 import { getMenu } from '../server/menu'
 import { pricePreview } from '../server/price'
 import { getStock } from '../server/stockView'
@@ -101,4 +102,8 @@ export const handlers = [
     await networkDelay(OTHER_DELAY_MS)
     return send(getOrders())
   }),
+
+  http.post('/api/dev/fail-next-reserve', () => send(devFailNextReserve())),
+
+  http.post('/api/dev/reset', () => send(devReset())),
 ]

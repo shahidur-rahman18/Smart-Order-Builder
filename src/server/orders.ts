@@ -45,8 +45,3 @@ export function buildStoredOrder(input: NewOrder): StoredOrder {
     pricingWarnings: input.pricingWarnings,
   }
 }
-
-// Content of the "Download orders.json" file: every order, exactly as stored.
-export function ordersToJson(orders: StoredOrder[]): string {
-  return JSON.stringify(orders, null, 2)
-}

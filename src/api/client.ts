@@ -2,6 +2,7 @@ import type {
   AddItemRequest,
   CartBody,
   CheckoutRequest,
+  DevBody,
   EditItemRequest,
   ErrorBody,
   ErrorCode,
@@ -85,4 +86,7 @@ export const api = {
   setCoupon: (code: string | null) => request<CartBody>('PUT', '/api/cart/coupon', { code }),
   checkout: (body: CheckoutRequest) => request<OrderBody>('POST', '/api/checkout', body),
   getOrders: () => request<OrdersBody>('GET', '/api/orders'),
+  // Dev tools only.
+  devFailNextReserve: () => request<DevBody>('POST', '/api/dev/fail-next-reserve'),
+  devReset: () => request<DevBody>('POST', '/api/dev/reset'),
 }

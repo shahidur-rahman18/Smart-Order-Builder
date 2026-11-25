@@ -15,6 +15,11 @@ export function failNextReserve(): void {
   chaos.reserveFailNext = true
 }
 
+// "Reset demo data" also cancels a pending failure.
+export function turnReserveFailureOff(): void {
+  chaos.reserveFailNext = false
+}
+
 // True once after failNextReserve(), then false again.
 export function takeReserveFailure(): boolean {
   if (!chaos.reserveFailNext) return false

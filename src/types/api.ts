@@ -88,6 +88,11 @@ export interface OrdersBody {
   serverTime: number
 }
 
+// Dev tools answers carry nothing but the time.
+export interface DevBody {
+  serverTime: number
+}
+
 // ---------- errors ----------
 
 export type ErrorCode =
