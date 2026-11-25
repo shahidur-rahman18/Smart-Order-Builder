@@ -1,5 +1,6 @@
 import type { CartItemView, CartView } from './cart'
 import type { Config, IngredientId, Shortage, Violation } from './menu'
+import type { StoredOrder } from './order'
 import type { CartBreakdown } from './pricing'
 
 // What a mock-server function gives back. MSW turns it into an HTTP response (Step 8).
@@ -21,6 +22,11 @@ export interface EditItemRequest {
   config: Config
   quantity: number
   itemVersion: number
+}
+
+export interface CheckoutRequest {
+  idempotencyKey: string
+  paymentMethod: string // checked against PAYMENT_METHODS on the server
 }
 
 // ---------- success bodies (every one carries serverTime) ----------
@@ -50,6 +56,16 @@ export interface StockBody {
   serverTime: number
 }
 
+export interface OrderBody {
+  order: StoredOrder
+  serverTime: number
+}
+
+export interface OrdersBody {
+  orders: StoredOrder[]
+  serverTime: number
+}
+
 // ---------- errors ----------
 
 export type ErrorCode =
@@ -60,6 +76,8 @@ export type ErrorCode =
   | 'NOT_FOUND'
   | 'EXPIRED'
   | 'VERSION_CONFLICT'
+  | 'CART_EMPTY'
+  | 'INVALID_PAYMENT_METHOD'
 
 export interface ErrorBody {
   code: ErrorCode

@@ -4,6 +4,8 @@ import { addItem, editItem, getCart, removeItem, setCoupon } from './cart'
 import { getStock } from './stockView'
 import { failNextReserve } from './chaos'
 import { withState } from './state'
+import { buildStoredOrder } from './orders'
+import { priceCart } from '../engine/pricing'
 import { formatShortages } from '../engine/stock'
 import { configA, configB, configByNames, configC } from '../test/builders'
 import { errorOf, ingredientId, ok } from '../test/serverHelpers'
@@ -169,10 +171,15 @@ describe('cart server details', () => {
 
   it('sold stock counts checkout orders only; seed orders are history', () => {
     const fullEggs = ok(getStock()).available[EGG]
+    const lines = [{ id: 'line-1', config: configB(), quantity: 1 }] // 6 eggs
+    const order = (id: string, source: 'seed' | 'checkout') => {
+      const pricedAtMs = Date.parse('2026-11-25T03:00:00.000Z')
+      const breakdown = priceCart(lines, menu, menu.promotions, pricedAtMs, null)
+      return buildStoredOrder({ id, source, pricedAtMs, paymentMethod: 'card', lines, breakdown, pricingWarnings: [] })
+    }
     withState((state) => {
-      const lines = [{ config: configB(), quantity: 1 }] // 6 eggs
-      state.orders.push({ id: 'seed-1', source: 'seed', createdAt: '2026-11-20T03:00:00.000Z', lines })
-      state.orders.push({ id: 'live-1', source: 'checkout', createdAt: '2026-11-25T03:00:00.000Z', lines })
+      state.orders.push(order('seed-1', 'seed'))
+      state.orders.push(order('live-1', 'checkout'))
     })
 
     const stock = ok(getStock())

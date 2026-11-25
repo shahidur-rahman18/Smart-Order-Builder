@@ -34,14 +34,51 @@ In the cart, the item is marked "Expired" and can only be removed. The user can 
 
 ## ◆ D4 — Order id/timestamp and double-click on Pay
 <!-- Think about: Why should the server (not the browser) create the id and createdAt? How does the idempotency key work? What else stops the second click? -->
+The server generates the order ID using `crypto.randomUUID()` and creates the timestamp using its own clock, so the browser's clock difference cannot affect the order time. Reusing the same idempotency key returns the previous result instead of creating another order. After a successful checkout, the cart is cleared, so a later request with a new key returns `409 CART_EMPTY` because no active items remain. The Pay button stays disabled while the request is pending.
 
 ## ◆ D5 — "Who is our best customer?"
 <!-- Think about: What exactly does the bot reply? Which two things stop it inventing a name (no tool + system prompt)? How is it tested (TC-20)? -->
 
 ## ◆ D6 — Stored order JSON shape
 <!-- Paste the real shape from src/types/order.ts. Explain: money unit, why totals are stored, how a coupon entered but not applied is recorded (status + reason). -->
+All order amounts are stored as integer poisha to avoid decimal calculation errors. Order totals are saved at checkout so that future price or promotion changes do not affect past orders or receipts. The coupon record keeps the entered code, whether it was applied, its status, and the reason if it was not applied.
+
+Example (seed order ORD-1006, as stored):
 
 ```json
+{
+  "id": "ORD-1006",
+  "source": "seed",
+  "createdAt": "2026-11-22T07:10:00.000Z",
+  "pricedAt": "2026-11-22T07:10:00.000Z",
+  "paymentMethod": "card",
+  "moneyUnit": "poisha",
+  "currency": "BDT",
+  "lines": [
+    {
+      "lineId": "ORD-1006-1",
+      "quantity": 1,
+      "config": { "croissant": 1, "omelette": 2, "fried": 2, "sausage": 1, "bacon": 1, "hashbrown": 1, "mushroom": 1, "hollandaise": 1 },
+      "unit": { "base": 25000, "optionsTotal": 50500, "step1": 75500,
+                "cheapestFree": { "freeUnits": 0, "discount": 0 }, "step2": 75500,
+                "combo": { "applied": true, "discount": 7550 }, "unitPrice": 67950 },
+      "lineTotal": 67950
+    },
+    {
+      "lineId": "ORD-1006-2",
+      "quantity": 1,
+      "config": { "croissant": 1, "fried": 2, "tofu": 1, "cheese": 2 },
+      "unit": { "base": 25000, "optionsTotal": 24000, "step1": 49000,
+                "cheapestFree": { "freeUnits": 0, "discount": 0 }, "step2": 49000,
+                "combo": { "applied": false, "discount": 0 }, "unitPrice": 49000 },
+      "lineTotal": 49000
+    }
+  ],
+  "coupon": { "entered": "MORNING15", "applied": false, "status": "expired_time", "reason": "MORNING15 is valid only before 11:00" },
+  "totals": { "subtotal": 116950, "discount": null, "discountedSubtotal": 116950,
+              "vat": 5848, "payableExact": 122798, "payable": 122800 },
+  "pricingWarnings": []
+}
 ```
 
 ## Extra decisions (short, 1–3 sentences each)

@@ -94,13 +94,13 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 **Commit(s):** `feat(server): atomic state, clock skew and idempotency` · `feat(server): cart reservations with TTL and atomic edit (TC-13..15)`
 
 ## Step 7 — Checkout, orders, seed, export, Part E (≈1.5 h) — TC-16, 17 + D4, D6
-- [ ] `server/orders.ts` (`buildStoredOrder`), `checkout.ts`, `seed.ts`
-- [ ] Tests:
-  - [ ] Pay twice with same key → 1 order, cart empty, sold counted once, expiry sweep does not release sold (TC-16)
-  - [ ] save → new load (refresh) → orders still there; export parses as JSON and matches the D6 shape (TC-17)
-  - [ ] seed loads once, priced at each createdAt; not loaded twice
-  - [ ] seed does not reduce current stock
-- [ ] **User writes D4 and D6 in DECISIONS.md** (D6 must match `StoredOrder` type exactly)
+- [x] `server/orders.ts` (`buildStoredOrder`), `checkout.ts`, `seed.ts`
+- [x] Tests:
+  - [x] Pay twice with same key → 1 order, cart empty, sold counted once, expiry sweep does not release sold (TC-16)
+  - [x] save → new load (refresh) → orders still there; export parses as JSON and matches the D6 shape (TC-17)
+  - [x] seed loads once, priced at each createdAt; not loaded twice
+  - [x] seed does not reduce current stock
+- [x] **User writes D4 and D6 in DECISIONS.md** (D6 must match `StoredOrder` type exactly)
 **Commit:** `feat(server): atomic checkout, persisted orders and priced seed (TC-16..17)`
 
 ## Step 8 — MSW handlers + API client (≈1 h)
@@ -218,3 +218,5 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 25 Nov 20:10 — D2 written by the user (lock at Pay; cart re-priced at server time; coupon-ends-at-11 message in cart UI, Step 10). Step 4 fully ticked.
 25 Nov — D3 written by the user in DECISIONS (option খ): unsaved edit is kept on screen; on expiry (serverNow countdown or 410 EXPIRED) Save is disabled with reason "Reservation expired. Stock was released."; old cart item shows Expired, Remove only; "Add as new item" = normal POST with new idempotency key and fresh stock check (409 shortages keep the config). UI work in Step 10.
 25 Nov — D1 written by the user (409 OUT_OF_STOCK with shortages + amounts, edited config kept, fix and Save again, atomic recheck). Step 6 fully ticked. D1/D3 UI tasks added to Step 10. Next: Step 7.
+25 Nov 21:50 — Step 7 code done (D4, D6 open — user writes them). types/order.ts full StoredOrder (lineId/unit/lineTotal per line, coupon = CouponResult, totals, pricedAt, moneyUnit, currency from fixture, pricingWarnings); PAYMENT_METHODS in types. server/orders.ts (buildStoredOrder, ordersToJson = plain array), checkout.ts (checkout + getOrders; empties cart incl. expired items and coupon; 409 CART_EMPTY, 422 INVALID_PAYMENT_METHOD), seed.ts (normalizeSeedOrder drops unknown options with a warning; priced at createdAt; seed ids kept). readState() adds seed in memory; a GET never writes, first successful mutation saves seeded=true. recall() typed per op. TC-16, TC-17 green; 138 tests green.
+25 Nov 22:10 — D4 and D6 written by the user (D6 example = stored ORD-1006, generated from code). Step 7 fully ticked. Next: Step 8.

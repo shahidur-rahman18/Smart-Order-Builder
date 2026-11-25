@@ -192,7 +192,7 @@ function findItem(state: ServerState, itemId: string): CartItem {
 
 // Same saved answer for a repeated key. Only serverTime is fresh, so the
 // browser's clock offset is not computed from an old time.
-function replay(saved: SavedResponse, now: number): ServerResponse<ItemBody> {
+function replay(saved: Extract<SavedResponse, { op: 'add-item' | 'edit-item' }>, now: number): ServerResponse<ItemBody> {
   return { status: saved.status, body: { ...saved.body, serverTime: now } }
 }
 

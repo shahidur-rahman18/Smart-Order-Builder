@@ -2,6 +2,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { serverNow } from './clock'
 import { STORAGE_KEY } from './storage'
 import { initialState, readState, withState } from './state'
+import { loadSeedOnce } from './seed'
+
+// What a brand-new shop looks like: empty cart, seed orders loaded.
+function freshState() {
+  const state = initialState()
+  loadSeedOnce(state)
+  return state
+}
 
 describe('server clock', () => {
   beforeEach(() => {
@@ -18,8 +26,16 @@ describe('server clock', () => {
 })
 
 describe('state in localStorage', () => {
-  it('starts from the initial state when nothing is saved', () => {
-    expect(readState()).toEqual(initialState())
+  it('starts from a fresh (seeded) state when nothing is saved', () => {
+    expect(readState()).toEqual(freshState())
+  })
+
+  it('a read never writes: the seed is saved by the first successful mutation', () => {
+    readState()
+    expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
+
+    withState(() => undefined)
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}')).toEqual(freshState())
   })
 
   it('withState saves the changed copy at the end', () => {
@@ -60,9 +76,9 @@ describe('state in localStorage', () => {
 
   it('broken or old saved data falls back to the initial state instead of crashing', () => {
     localStorage.setItem(STORAGE_KEY, '{not json')
-    expect(readState()).toEqual(initialState())
+    expect(readState()).toEqual(freshState())
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: 999 }))
-    expect(readState()).toEqual(initialState())
+    expect(readState()).toEqual(freshState())
   })
 })

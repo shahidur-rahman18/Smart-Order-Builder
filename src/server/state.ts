@@ -1,13 +1,15 @@
-import type { ItemBody } from '../types/api'
+import type { ItemBody, OrderBody } from '../types/api'
 import type { Cart } from '../types/cart'
 import type { StoredOrder } from '../types/order'
+import { loadSeedOnce } from './seed'
 import { loadState, saveState } from './storage'
 
 // A saved success response, so a repeated request gets the same answer.
-// `op` keeps keys of different operations apart. Step 7 adds checkout here.
+// `op` keeps keys of different operations apart.
 export type SavedResponse =
   | { op: 'add-item'; status: number; body: ItemBody }
   | { op: 'edit-item'; status: number; body: ItemBody }
+  | { op: 'checkout'; status: number; body: OrderBody }
 
 export type IdempotencyEntry = SavedResponse & { savedAt: number }
 
@@ -31,9 +33,14 @@ export function initialState(): ServerState {
   }
 }
 
-// For read-only requests (GET).
+// Every request starts here. If the seed is not stored yet, it is added to this
+// copy only. A GET never writes, so the seed is saved (with seeded = true) by the
+// first successful mutation. Seeding is deterministic, so every GET before that
+// sees exactly the same seed orders.
 export function readState(): ServerState {
-  return loadState() ?? initialState()
+  const state = loadState() ?? initialState()
+  loadSeedOnce(state)
+  return state
 }
 
 // Every mutation runs inside this: load → work on the copy → save once.
