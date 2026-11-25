@@ -5,6 +5,9 @@ import type { CouponResult, UnitBreakdown } from './pricing'
 export const PAYMENT_METHODS = ['card', 'bkash', 'cash'] as const
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number]
 
+// What the payment select shows.
+export const PAYMENT_LABELS: Record<PaymentMethod, string> = { card: 'Card', bkash: 'bKash', cash: 'Cash' }
+
 export function isPaymentMethod(value: string): value is PaymentMethod {
   return PAYMENT_METHODS.some((method) => method === value)
 }

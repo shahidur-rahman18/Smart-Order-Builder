@@ -1,19 +1,30 @@
-import { useMemo, useState } from 'react'
-import { optionHeadroom, shortagesFor, usageOf } from '../../engine/stock'
+import { useEffect, useMemo, useState } from 'react'
+import { availableForEdit, optionHeadroom, shortagesFor, usageOf } from '../../engine/stock'
 import { validate } from '../../engine/validate'
 import { useAddToCart } from '../../hooks/useAddToCart'
+import { formatCountdown, useCountdown } from '../../hooks/useCountdown'
+import { useEditItem } from '../../hooks/useEditItem'
 import { usePricePreview } from '../../hooks/usePricePreview'
 import { useStock } from '../../hooks/useStock'
 import type { ItemBody } from '../../types/api'
+import type { CartItemView } from '../../types/cart'
 import type { Config, Menu, OptionId } from '../../types/menu'
 import { GroupSection } from './GroupSection'
 import { PricePreview } from './PricePreview'
 import { QuantityPicker } from './QuantityPicker'
 import { ViolationList } from './ViolationList'
 
+const EXPIRED_MESSAGE = 'Reservation expired. Stock was released.'
+
 interface Props {
   menu: Menu
   onAdded?: (body: ItemBody) => void
+  // Changes whenever the cart changes (e.g. Remove): freed stock should show at once.
+  cartVersion?: number
+  // Edit mode: the cart item being changed. The parent gives the Builder a new
+  // `key` per item, so config/quantity below start from this item.
+  editing?: CartItemView | null
+  onEditDone?: () => void // saved, added as new, or cancelled
 }
 
 // Config keeps only options with qty > 0 (same shape the server expects).
@@ -24,59 +35,123 @@ function withQty(config: Config, optionId: OptionId, qty: number): Config {
   return next
 }
 
+const buttonClass =
+  'rounded bg-slate-900 px-4 py-2 font-medium text-white disabled:cursor-not-allowed disabled:bg-slate-400'
+
 // Everything on screen comes from `menu`: groups, options, prices, limits.
-export function Builder({ menu, onAdded }: Props) {
-  const [config, setConfig] = useState<Config>({})
-  const [quantity, setQuantity] = useState(1)
+export function Builder({ menu, onAdded, cartVersion, editing = null, onEditDone }: Props) {
+  const [config, setConfig] = useState<Config>(() => editing?.config ?? {})
+  const [quantity, setQuantity] = useState(() => editing?.quantity ?? 1)
   const stock = useStock()
+  const refreshStock = stock.refresh
+  useEffect(() => {
+    if (cartVersion !== undefined) refreshStock()
+  }, [cartVersion, refreshStock])
+
   const preview = usePricePreview(config, quantity)
   const addToCart = useAddToCart((body) => {
     setConfig({})
     setQuantity(1)
     stock.refresh()
     onAdded?.(body)
+    onEditDone?.()
   }, stock.refresh)
+  const editItem = useEditItem(
+    editing,
+    () => {
+      stock.refresh()
+      onEditDone?.()
+    },
+    stock.refresh,
+  )
+
+  // D3: in edit mode, count down with server time; at 0 (or a 410) Save is over.
+  const msLeft = useCountdown(editing?.expiresAt ?? null)
+  const editExpired = editing !== null && (msLeft === 0 || editItem.expired)
+  const canSave = editing !== null && !editExpired
+
+  // Stock this draft may use. While an edit can still be saved, the item's own
+  // share counts as available to it (net difference, same as the server).
+  const available = useMemo(() => {
+    if (!stock.available) return null
+    return canSave && editing ? availableForEdit(stock.available, editing, menu) : stock.available
+  }, [stock.available, canSave, editing, menu])
 
   // Same rules engine as the server, so the user sees problems before sending.
   const violations = useMemo(() => validate(config, menu.groups, menu.rules), [config, menu])
 
   const headroom = useMemo(
-    () => (stock.available ? optionHeadroom(menu, stock.available, config, quantity) : null),
-    [menu, stock.available, config, quantity],
+    () => (available ? optionHeadroom(menu, available, config, quantity) : null),
+    [menu, available, config, quantity],
   )
 
   // The draft itself may already be too big (e.g. another tab took the stock).
   const shortages = useMemo(
-    () => (stock.available ? shortagesFor(usageOf(config, menu, quantity), stock.available, menu) : []),
-    [menu, stock.available, config, quantity],
+    () => (available ? shortagesFor(usageOf(config, menu, quantity), available, menu) : []),
+    [menu, available, config, quantity],
   )
+
+  function clearMessages(): void {
+    addToCart.clearMessage()
+    editItem.clearMessage()
+  }
 
   function changeOption(optionId: OptionId, qty: number): void {
     setConfig((old) => withQty(old, optionId, qty))
-    addToCart.clearMessage()
+    clearMessages()
   }
 
   function changeQuantity(next: number): void {
     setQuantity(next)
-    addToCart.clearMessage()
+    clearMessages()
   }
 
   function add(): void {
     addToCart.add(config, quantity)
   }
 
-  const pending = addToCart.status === 'pending'
-  let disabledReason: string | null = null
-  if (stock.available === null) disabledReason = 'Loading stock…'
-  else if (violations.length > 0) disabledReason = 'Fix the problems above first.'
-  else if (shortages.length > 0) disabledReason = 'Not enough stock for this item.'
-  else if (pending) disabledReason = 'Adding…'
+  function save(): void {
+    editItem.save(config, quantity)
+  }
 
-  const failure = addToCart.failure
+  // One reason why the draft cannot be sent at all; shown next to the button.
+  let draftProblem: string | null = null
+  if (available === null) draftProblem = 'Loading stock…'
+  else if (violations.length > 0) draftProblem = 'Fix the problems above first.'
+  else if (shortages.length > 0) draftProblem = 'Not enough stock for this item.'
+
+  const adding = addToCart.status === 'pending'
+  const saving = editItem.status === 'pending'
+  const addReason = draftProblem ?? (adding ? 'Adding…' : null)
+  let saveReason: string | null = editExpired ? EXPIRED_MESSAGE : draftProblem
+  if (saveReason === null && saving) saveReason = 'Saving…'
+
+  // The failure that belongs to the button on screen.
+  const failure = canSave ? editItem.failure : addToCart.failure
+  const retry = canSave ? save : add
+  const busy = adding || saving
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">{menu.product.name}</h2>
+      <h2 className="text-lg font-semibold">
+        {editing ? `Editing cart item · ${menu.product.name}` : menu.product.name}
+      </h2>
+
+      {editing && (
+        <div
+          role={editExpired ? 'alert' : undefined}
+          className={`rounded-lg border p-3 text-sm ${editExpired ? 'border-amber-300 bg-amber-50 text-amber-900' : 'border-slate-200 bg-white'}`}
+        >
+          {editExpired ? (
+            <p>
+              <span className="font-medium">{EXPIRED_MESSAGE}</span> Your changes are kept. Add them as a new item
+              to check stock again.
+            </p>
+          ) : (
+            <p>Reservation: {formatCountdown(msLeft ?? 0)} left. Saving does not renew it.</p>
+          )}
+        </div>
+      )}
 
       {menu.groups.map((group) => (
         <GroupSection key={group.id} group={group} config={config} headroom={headroom} onChange={changeOption} />
@@ -84,7 +159,8 @@ export function Builder({ menu, onAdded }: Props) {
 
       <ViolationList violations={violations} />
 
-      {shortages.length > 0 && (
+      {/* The server's answer already lists the shortages; don't say it twice. */}
+      {shortages.length > 0 && !failure?.shortages.length && (
         <p className="text-sm text-red-700">
           Short: {shortages.map((s) => `${s.missing} ${s.name}`).join(', ')}
         </p>
@@ -94,16 +170,56 @@ export function Builder({ menu, onAdded }: Props) {
 
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-white p-4">
         <QuantityPicker value={quantity} max={menu.shop.maxItemQuantity} onChange={changeQuantity} />
-        <button
-          type="button"
-          className="rounded bg-slate-900 px-4 py-2 font-medium text-white disabled:cursor-not-allowed disabled:bg-slate-400"
-          disabled={disabledReason !== null}
-          title={disabledReason ?? undefined}
-          onClick={add}
-        >
-          Add to cart
-        </button>
-        {disabledReason && <span className="text-sm text-slate-500">{disabledReason}</span>}
+
+        {editing ? (
+          <>
+            <button
+              type="button"
+              className={buttonClass}
+              disabled={saveReason !== null}
+              title={saveReason ?? undefined}
+              onClick={save}
+            >
+              Save changes
+            </button>
+            {editExpired && (
+              <button
+                type="button"
+                className={buttonClass}
+                disabled={addReason !== null}
+                title={addReason ?? undefined}
+                onClick={add}
+              >
+                Add as new item
+              </button>
+            )}
+            <button
+              type="button"
+              className="rounded border border-slate-300 px-4 py-2 text-slate-700 disabled:opacity-50"
+              disabled={busy}
+              title={busy ? 'Wait for the request to finish' : undefined}
+              onClick={onEditDone}
+            >
+              Cancel edit
+            </button>
+            {editExpired
+              ? addReason && <span className="text-sm text-slate-500">{addReason}</span>
+              : saveReason && <span className="text-sm text-slate-500">{saveReason}</span>}
+          </>
+        ) : (
+          <>
+            <button
+              type="button"
+              className={buttonClass}
+              disabled={addReason !== null}
+              title={addReason ?? undefined}
+              onClick={add}
+            >
+              Add to cart
+            </button>
+            {addReason && <span className="text-sm text-slate-500">{addReason}</span>}
+          </>
+        )}
       </div>
 
       {addToCart.status === 'added' && (
@@ -116,7 +232,7 @@ export function Builder({ menu, onAdded }: Props) {
         <div role="alert" className="flex flex-wrap items-center gap-2 text-sm text-red-700">
           <span>{failure.message}</span>
           {failure.canRetry && (
-            <button type="button" className="rounded border border-red-300 px-3 py-1" disabled={pending} onClick={add}>
+            <button type="button" className="rounded border border-red-300 px-3 py-1" disabled={busy} onClick={retry}>
               Retry
             </button>
           )}

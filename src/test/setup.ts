@@ -1,9 +1,13 @@
 import '@testing-library/jest-dom/vitest'
 import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest'
-import { cleanup } from '@testing-library/react'
+import { cleanup, configure } from '@testing-library/react'
 import { latency } from '../mock/handlers'
 import { server } from '../mock/node'
 import { turnChaosOffForTests } from '../server/chaos'
+
+// findBy…/waitFor wait 1 s by default. The full App loads menu → cart → stock
+// one after another, and with every test file running in parallel that can take longer.
+configure({ asyncUtilTimeout: 3000 })
 
 beforeAll(() => {
   // Same handlers as the browser. Any /api call we forgot to mock fails loudly.
