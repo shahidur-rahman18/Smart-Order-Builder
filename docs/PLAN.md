@@ -63,13 +63,13 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 - [x] TC-04: Tofu + Bacon + Chili + Hollandaise → **both** excludes violations listed
 **Commit:** `feat(engine): generic validate() with group limits and cross-group rules (TC-01..04)`
 
-## Step 4 — Pricing engine, Part C (≈1.5 h) — TC-05…07 + D2
+## ✅ Step 4 — Pricing engine, Part C (≈1.5 h) — TC-05…07 + D2
 - [x] `src/engine/time.ts` (`isStrictlyBefore`, `localDate`) + tests at 10:59:59 / 11:00:00 Dhaka
 - [x] Write `tc05-07.pricing.test.ts` first
 - [x] `src/engine/pricing.ts`: `priceUnit`, `priceCart` with full breakdown + coupon status
 - [x] Unit tests: P2 with 3/4/6 extras; P1 boundary (eggs 3 vs 4 units, Omelette counts 1); tie → C1; coupon wrong code; coupon lowercase
 - [x] Hand-check tests from ANSWERS: Q2 = 360.00, Q3 = 1040 / 1197
-- [ ] **User writes D2 in DECISIONS.md** (suggested: lock at checkout)
+- [x] **User writes D2 in DECISIONS.md** (suggested: lock at checkout)
 **Commit:** `feat(engine): priceCart with promotions, cart discount and VAT (TC-05..07)`
 
 ## ✅ Step 5 — Stock engine, Part B (≈1.5 h) — TC-08…11
@@ -83,13 +83,13 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 **Commit:** `feat(engine): ingredient stock, shortages and edit net difference (TC-08..11)`
 
 ## Step 6 — Mock server: cart & reservations, Part D (≈2 h) — TC-13…15 (server level) + D1, D3
-- [ ] `server/clock.ts`, `chaos.ts`, `storage.ts`, `state.ts (withState)`, `idempotency.ts`, `stockView.ts`, `cart.ts`
-- [ ] Tests (server functions directly):
-  - [ ] same idempotency key ×3 → 1 item (TC-13)
-  - [ ] chaos mid-way failure → state unchanged, no stock held; retry same key → success (TC-14)
-  - [ ] item expires at server `createdAt + 300 s` with 90 s skew; stock released; edit → 410 (TC-15)
-  - [ ] TC-08…11 again through `cart.ts` (409 with shortages)
-  - [ ] two "tabs" = two calls on the same localStorage: tab B takes eggs, tab A's edit → 409 with fresh `available` (D1)
+- [x] `server/clock.ts`, `chaos.ts`, `storage.ts`, `state.ts (withState)`, `idempotency.ts`, `stockView.ts`, `cart.ts`
+- [x] Tests (server functions directly):
+  - [x] same idempotency key ×3 → 1 item (TC-13)
+  - [x] chaos mid-way failure → state unchanged, no stock held; retry same key → success (TC-14)
+  - [x] item expires at server `createdAt + 300 s` with 90 s skew; stock released; edit → 410 (TC-15)
+  - [x] TC-08…11 again through `cart.ts` (409 with shortages)
+  - [x] two "tabs" = two calls on the same localStorage: tab B takes eggs, tab A's edit → 409 with fresh `available` (D1)
 - [ ] **User writes D1 and D3 in DECISIONS.md**
 **Commit(s):** `feat(server): atomic state, clock skew and idempotency` · `feat(server): cart reservations with TTL and atomic edit (TC-13..15)`
 
@@ -210,3 +210,5 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 25 Nov 18:30 — Step 3 done in 3 parts. validate.ts (group limits, overrideLimit smallest-wins, requires, excludes, unknown option kind 'unknown' added to Violation). TC-01…04 green; 48 tests green. User to write the 'unknown' decision in DECISIONS extras later.
 25 Nov 18:40 — Step 4 code done (D2 still open, user writes it). time.ts + pricing.ts; UnitBreakdown fields named `cheapestFree`/`combo` (not p2/p1, so no promo ids in engine code); priceCart takes optional 5th arg couponCode (SPEC lists 4). TC-05…07 + Q2/Q3 hand checks green; 75 tests green.
 25 Nov 19:20 — Step 5 done. stock.ts (usageOf, sum/subtractUsage, availableStock(menu, soldLines, reservedLines) clamped at 0, availableForEdit, shortagesFor, formatShortages, optionHeadroom). availableStock takes lines, not usage (small change from ARCHITECTURE). menu.alt.json (burger, London time) passes validate/price/stock. check-hardcode.mjs: string literals + .id / id: keys, comments ignored; clean. TC-01…11 green; 103 tests green. D2 still open (user).
+25 Nov 19:45 — Step 6 code done (D1, D3 open — user writes them; D2 also still open). server/: clock, chaos, storage (loadState → null on broken/old data), state (withState = load→work→save), idempotency (key namespaced by op, failures not remembered, replay refreshes serverTime), http (ServerError + respond), stockView, cart. Edit keeps original expiresAt; 409 on edit returns availableForEdit. types/api.ts, cart.ts, order.ts (minimal StoredOrder, Step 7 extends). 125 tests green.
+25 Nov 20:10 — D2 written by the user (lock at Pay; cart re-priced at server time; coupon-ends-at-11 message in cart UI, Step 10). Step 4 fully ticked.

@@ -25,6 +25,7 @@ Payable = 150950 + 7548 = 158498 poisha = BDT 1584.98. `toWholeBdtPoisha(158498)
 
 ## ◆ D2 — When is a price locked?
 <!-- Think about: Add to cart vs checkout vs never. How does TC-06 (10:59:59) vs TC-07 (11:00:00) behave with your choice? What does the cart show before Pay? -->
+I lock the price when the user clicks Pay, not when the item goes into the cart. It is like a shop counter: you get the offer that is running when you pay. So if someone adds an item at 10:58 and pays at 11:02, they don't get MORNING15, because the coupon only works before 11:00 (TC-06, TC-07). This means the cart price can change, so I show a small message in the cart that the coupon ends at 11. I always use the server clock, because browser time can be different on every device.
 
 ## ◆ D3 — Reservation expires during an edit
 <!-- Think about: Are unsaved changes kept? What message appears? What can the user do next (e.g. add as a new item)? Why is the old item read-only? -->
