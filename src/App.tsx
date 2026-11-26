@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ChatPanel } from './components/assistant/ChatPanel'
 import { Builder } from './components/builder/Builder'
 import { CartPanel } from './components/cart/CartPanel'
 import { DevTools } from './components/DevTools'
@@ -51,6 +52,11 @@ function Shop({ menu }: { menu: Menu }) {
           <div id="cart" className="scroll-mt-4 pb-6 lg:min-h-0 lg:overflow-y-auto lg:pb-0">
             <CartPanel menu={menu} cart={cart} editingId={editingItem?.id ?? null} onEdit={setEditing} />
           </div>
+        </div>
+
+        {/* Hidden, not removed: the conversation survives a look at another tab. */}
+        <div hidden={tab !== 'assistant'} className="mx-auto w-full max-w-4xl px-4 py-4 sm:px-6 lg:h-full">
+          <ChatPanel timeZone={menu.shop.timeZone} />
         </div>
 
         {/* Mounted only while open: it asks for fresh orders each time. */}

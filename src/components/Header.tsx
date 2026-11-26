@@ -1,6 +1,6 @@
 import { ServerClock } from './ServerClock'
 
-export type Tab = 'build' | 'orders'
+export type Tab = 'build' | 'orders' | 'assistant'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'build', label: 'Build' },
@@ -43,8 +43,16 @@ export function Header({ tab, onTab, timeZone, cartCount = 0 }: Props) {
 
         <div className="ml-auto flex items-center gap-2">
           {timeZone && <ServerClock timeZone={timeZone} />}
-          {/* Part G comes later: the button keeps its place but does nothing yet. */}
-          <button type="button" className={iconButton} disabled title="Sales assistant is coming soon">
+          {/* Opens the Assistant page (Part F). Disabled only while the menu is loading. */}
+          <button
+            type="button"
+            aria-label="Sales assistant"
+            aria-pressed={tab === 'assistant'}
+            className={`${iconButton} disabled:opacity-50 ${tab === 'assistant' ? 'ring-2 ring-primary ring-offset-2' : ''}`}
+            disabled={!onTab}
+            title={onTab ? undefined : 'Loading menu…'}
+            onClick={() => onTab?.('assistant')}
+          >
             <span aria-hidden="true">✦</span>
             <span className="hidden sm:inline">Sales assistant</span>
           </button>
