@@ -94,6 +94,12 @@ Component → hook → api/client.ts → fetch('/api/…')
 - **Idempotency.** Add to cart, edit and checkout carry an idempotency key. The same key returns the
   saved response and does not run the work twice (TC-13, TC-16). Failed attempts are not remembered,
   so Retry with the same key works (TC-14).
+- **Versions (Part G).** A change that could overwrite another tab's work says which version it saw:
+  coupon and checkout send the cart's `cartVersion`, edit and remove send the item's `itemVersion`.
+  An old version → `409 VERSION_CONFLICT`, nothing is saved, the tab reloads the cart and says why.
+  Add to cart sends no version: it only adds, so it cannot overwrite anything, and a version there
+  would only cause needless conflicts between two tabs that are both adding. The version is checked
+  after the idempotency replay, so a double click on Pay is still one order.
 - **Chaos and latency.** `/api/price` takes 200–1500 ms and fails 15 % of the time. Add to cart can be
   made to fail halfway through. In tests latency and random failures are off unless a test turns them on.
 
@@ -191,13 +197,13 @@ Tests mock Gemini (`gemini.test.ts` and a fake Gemini on MSW in `tc18-20.assista
 
 ## 5. Tests
 
-`npm test` runs everything (28 files, 233 tests).
+`npm test` runs everything (30 files, 247 tests).
 
 | Where | What |
 |---|---|
 | `src/engine/*.test.ts` | unit tests for each engine (rounding edge cases, every rule type, shortages, headroom, alt menu) |
 | `src/server/*.test.ts` | atomicity, idempotency, seed pricing, storage |
-| `src/test/acceptance/` | SPEC §9, one file per TC group; each test name starts with its TC id (TC-01 … TC-20), plus the D1 and D3 UI flows |
+| `src/test/acceptance/` | SPEC §9, one file per TC group; each test name starts with its TC id (TC-01 … TC-20), plus the D1 and D3 UI flows; `partG.*` for the bonus (versions, refresh, draft) |
 | `src/assistant/*.test.ts` | stats on the priced seed, the tool runner, the Gemini loop and its errors |
 | `src/answers/answers.test.ts` | Q1–Q8 (see ANSWERS.md) |
 
@@ -226,15 +232,21 @@ Test items A, B and C are built from option **names** (`src/test/builders.ts`), 
 
 ---
 
-## 7. What is unfinished
+## 7. Part G (bonus) and what is unfinished
 
-- **Part G (bonus) is not done:**
-  - Refresh does reload the cart from the server, so expired items show as expired, but there is no
-    dedicated bonus test for it.
-  - There is no cart-level `version` on every mutation. Only an edit carries the item's version
-    (`VERSION_CONFLICT`).
-  - The unfinished builder config is not saved to `localStorage`, so it is lost on refresh.
+Part G is done:
+- **Refresh keeps only still-valid reservations.** The cart always comes from the server, so after a
+  reload expired items show as expired (read-only, no stock held) and active ones keep counting down.
+- **Two tabs.** Stale changes get `409 VERSION_CONFLICT` and the tab reloads (see "Versions" above).
+  An edit that conflicts blocks Save with the reason; the user cancels and opens the item again.
+- **Unfinished configuration survives a refresh.** The new-item builder saves its choices and quantity
+  in `localStorage["sob:draft"]` (`hooks/draftStorage.ts`). On load the draft is checked against the
+  current menu; an unknown option or a bad number throws it away. Add to cart and "Reset demo data"
+  clear it. An edit is not saved as the draft, so cancelling an edit brings the new item back.
+
+Unfinished:
 - No real backend or database (see Trade-offs).
+- The draft is one per browser, not per tab: two tabs building at once share the last one saved.
 
 ---
 
