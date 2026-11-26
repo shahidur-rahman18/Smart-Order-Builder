@@ -16,9 +16,37 @@ Payable = 150950 + 7548 = 158498 poisha = BDT 1584.98. `toWholeBdtPoisha(158498)
 ## ✋ C2 — Bot questions → functions
 <!-- A table: question | function name | inputs | output. Must match src/assistant/tools.ts exactly. -->
 
-| Question | Function | Inputs | Output |
-|---|---|---|---|
-| | | | |
+The bot never does any maths itself. Every supported question has one pure function in
+`src/assistant/stats.ts`. These functions never fetch data; they only work on the order list they are given.
+
+`src/assistant/tools.ts` sits in the middle. Each time Gemini asks for a tool, `tools.ts` fetches a fresh
+order list from `/api/orders`, passes it to the matching function, and sends the result back to Gemini.
+Gemini only picks which function to call and turns the result into one sentence.
+
+| # | Example question | Function | Inputs | Output |
+|---|---|---|---|---|
+| 1 | "How many orders?" | `countOrders` | orders | total number of orders |
+| 2 | "What is the total revenue?" | `totalRevenue` | orders | total amount (poisha + formatted BDT text) |
+| 3 | "What is the best-selling option?" | `bestSellingOptions` | orders, menu (for option names), how many to show (default 1) | option name, units sold, and whether there is a tie |
+| 4 | "Revenue by payment method?" | `revenueByPaymentMethod` | orders | for every payment method found in the data: revenue and order count |
+| 5 | "What is the average order value?" | `averageOrderValue` | orders | average amount and how many orders it is based on |
+| 6 | "How many orders actually got the coupon?" | `couponUsage` | orders | how many entered a code, how many really got the discount, and the id + reason for each that did not |
+| 7 | "How many orders on 20 November?" | `ordersOnDate` | orders, date (`YYYY-MM-DD`), time zone | order count, order ids and revenue for that day. A badly formatted date returns an error and the bot asks for a valid date |
+| 8 | "What can you tell me?" or anything not in the data (customer, phone number) | `describeData` | nothing | what the bot can answer, what the data contains, and what it does not |
+
+### Calculation rules
+
+- **Revenue** = sum of each order's `payable`.
+- **Units** = line quantity × option qty, summed over all orders.
+- **"Got the coupon"** means `coupon.applied === true`. An entered code that was not applied is not counted.
+- **Payment methods** do not come from a fixed list. Orders are grouped by whatever method each order records.
+- **Dates** use the time zone from the menu fixture (currently Asia/Dhaka), applied to each order's `createdAt`.
+  A menu for a shop in another time zone works with the same code.
+- Money is returned in poisha together with ready-made BDT text, so the model never has to do arithmetic.
+- `tools.ts` fetches fresh orders on every tool call, so a new checkout shows up in the very next answer
+  without a reload (TC-18).
+- If a question does not match any function, the bot says it cannot answer that from the data and lists
+  what it can answer.
 
 ## ◆ D1 — Two tabs, last eggs taken while editing
 When Tab B takes the last available eggs, Tab A's save must fail with a `409 OUT_OF_STOCK` because the stock has changed. The screen shows which ingredients are short and by how much, but all the user's unsaved changes remain intact. The user can update their selection and try saving again. The server rechecks stock atomically to prevent overselling.
