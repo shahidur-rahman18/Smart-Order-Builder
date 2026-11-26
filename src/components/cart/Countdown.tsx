@@ -5,9 +5,13 @@ interface Props {
 }
 
 export function Countdown({ msLeft }: Props) {
-  // The last minute is shown in amber, so the user notices before it runs out.
+  // The last minute is shown in red, so the user notices before it runs out.
   const urgent = msLeft < 60_000
   return (
-    <span className={urgent ? 'font-medium text-amber-700' : 'text-slate-600'}>{formatCountdown(msLeft)} left</span>
+    <span
+      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold tabular-nums ${urgent ? 'bg-red-50 text-red-700' : 'bg-page text-muted'}`}
+    >
+      {formatCountdown(msLeft)} left
+    </span>
   )
 }

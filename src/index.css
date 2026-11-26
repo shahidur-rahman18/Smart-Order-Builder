@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+/*
+ * Brand colours: the ONE place to change how the app looks.
+ * Each line below becomes Tailwind classes, e.g. --color-primary -> bg-primary, text-primary, border-primary.
+ * Components use only these names (and red/emerald for status), never raw hex codes.
+ */
+@theme {
+  --color-primary: #c2410c; /* main buttons: Add, Pay */
+  --color-primary-hover: #9a3412; /* hover on primary, dark accent text */
+  --color-selected: #fff7ed; /* background of a selected option / highlight */
+  --color-yolk: #f59e0b; /* logo */
+  --color-ink: #1c1917; /* main text */
+  --color-muted: #57534e; /* secondary text */
+  --color-page: #f6f4f1; /* page background, soft panels */
+  --color-line: #e7e5e4; /* borders */
+}

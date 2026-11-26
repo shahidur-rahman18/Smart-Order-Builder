@@ -1,3 +1,5 @@
+import { input } from '../ui'
+
 interface Props {
   value: number
   max: number // from the menu (shop.maxItemQuantity)
@@ -9,9 +11,9 @@ export function QuantityPicker({ value, max, onChange }: Props) {
   const choices = Array.from({ length: max }, (_, index) => index + 1)
   return (
     <label className="flex items-center gap-2 text-sm">
-      <span className="font-medium">Quantity</span>
+      <span className="font-medium text-muted">Quantity</span>
       <select
-        className="rounded border border-slate-300 bg-white px-2 py-1"
+        className={`${input} w-20`}
         value={value}
         onChange={(event) => onChange(Number(event.target.value))}
       >

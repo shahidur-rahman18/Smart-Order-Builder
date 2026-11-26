@@ -9,6 +9,7 @@ import { CartItemRow } from './CartItemRow'
 import { CartTotals } from './CartTotals'
 import { CouponInput } from './CouponInput'
 import { PaymentSelect } from './PaymentSelect'
+import { btnDanger, btnPrimary, card } from '../ui'
 
 interface Props {
   menu: Menu
@@ -41,18 +42,29 @@ export function CartPanel({ menu, cart, editingId, onEdit, onPaid }: Props) {
   }
 
   return (
-    <section aria-labelledby="cart-heading" className="space-y-3">
-      <h2 id="cart-heading" className="text-lg font-semibold">
-        Cart
-      </h2>
+    <section aria-labelledby="cart-heading" className={`${card} space-y-4`}>
+      <div className="flex items-center justify-between gap-2">
+        <h2 id="cart-heading" className="text-lg font-bold text-ink">
+          Cart
+        </h2>
+        {items.length > 0 && (
+          <span className="rounded-full bg-selected px-2.5 py-0.5 text-xs font-semibold text-primary-hover">
+            {items.length} {items.length === 1 ? 'item' : 'items'}
+          </span>
+        )}
+      </div>
 
       {cart.error && (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
           {cart.error}
         </p>
       )}
-      {cart.cart === null && !cart.error && <p className="text-sm text-slate-500">Loading cart…</p>}
-      {cart.cart !== null && items.length === 0 && <p className="text-sm text-slate-500">Your cart is empty.</p>}
+      {cart.cart === null && !cart.error && <p className="text-sm text-muted">Loading cart…</p>}
+      {cart.cart !== null && items.length === 0 && (
+        <p className="rounded-xl border border-dashed border-line p-6 text-center text-sm text-muted">
+          Your cart is empty.
+        </p>
+      )}
 
       {items.length > 0 && (
         <ul className="space-y-2">
@@ -85,32 +97,32 @@ export function CartPanel({ menu, cart, editingId, onEdit, onPaid }: Props) {
 
       {totals && totals.lines.length > 0 && <CartTotals menu={menu} totals={totals} />}
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="space-y-2">
         <PaymentSelect value={paymentMethod} onChange={setPaymentMethod} />
         <button
           type="button"
-          className="rounded bg-slate-900 px-4 py-2 font-medium text-white disabled:cursor-not-allowed disabled:bg-slate-400"
+          className={`${btnPrimary} w-full`}
           disabled={payReason !== null}
           title={payReason ?? undefined}
           onClick={pay}
         >
           {totals && totals.lines.length > 0 ? `Pay BDT ${formatBdt(totals.payable)}` : 'Pay'}
         </button>
-        {payReason && <span className="text-sm text-slate-500">{payReason}</span>}
+        {payReason && <p className="text-center text-xs text-muted">{payReason}</p>}
       </div>
 
       {checkout.status === 'paid' && checkout.order && (
-        <p role="status" className="text-sm text-green-700">
+        <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-medium break-all text-emerald-700">
           Order placed: {checkout.order.id} · BDT {formatBdt(checkout.order.totals.payable)}
         </p>
       )}
       {checkout.failure && (
-        <div role="alert" className="flex flex-wrap items-center gap-2 text-sm text-red-700">
+        <div role="alert" className="flex flex-wrap items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-700">
           <span>{checkout.failure.message}</span>
           {checkout.failure.canRetry && (
             <button
               type="button"
-              className="rounded border border-red-300 px-3 py-1"
+              className={btnDanger}
               disabled={payReason !== null}
               title={payReason ?? undefined}
               onClick={pay}

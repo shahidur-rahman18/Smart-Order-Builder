@@ -1,10 +1,13 @@
-import type { Config, Group, OptionId } from '../../types/menu'
+import type { Config, Group, OptionId, Violation } from '../../types/menu'
+import { card } from '../ui'
 import { OptionRow } from './OptionRow'
 
 interface Props {
   group: Group
   config: Config
   headroom: Record<OptionId, number | 'unlimited'> | null
+  // All problems of the draft; this card shows a badge for its own (id = group id).
+  violations: Violation[]
   onChange: (optionId: OptionId, qty: number) => void
 }
 
@@ -27,13 +30,33 @@ function groupHint(group: Group): string {
   return parts.join(', ')
 }
 
-export function GroupSection({ group, config, headroom, onChange }: Props) {
+function StatusBadge({ total, hasProblem }: { total: number; hasProblem: boolean }) {
+  const base = 'shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold'
+  if (hasProblem && total === 0) return <span className={`${base} bg-selected text-primary-hover`}>Required</span>
+  if (hasProblem) return <span className={`${base} bg-red-50 text-red-700`}>Check rules</span>
+  if (total === 0) return <span className={`${base} bg-page text-muted`}>Optional</span>
+  return <span className={`${base} bg-emerald-50 text-emerald-700`}>✓ {total} chosen</span>
+}
+
+export function GroupSection({ group, config, headroom, violations, onChange }: Props) {
+  const hint = groupHint(group)
+  const total = group.options.reduce((sum, option) => sum + (config[option.id] ?? 0), 0)
+  const hasProblem = violations.some((v) => v.id === group.id)
+
   return (
-    <fieldset className="rounded-lg border border-slate-200 bg-white p-4">
-      <legend className="px-1 font-semibold">
-        {group.name} <span className="text-sm font-normal text-slate-500">({groupHint(group)})</span>
+    <fieldset className={card}>
+      {/* The legend names the group for screen readers; the header below is what people see. */}
+      <legend className="sr-only">
+        {group.name} ({hint})
       </legend>
-      <ul className="divide-y divide-slate-100">
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="text-base font-semibold text-ink">{group.name}</h3>
+          <p className="text-xs text-muted">{hint}</p>
+        </div>
+        <StatusBadge total={total} hasProblem={hasProblem} />
+      </div>
+      <ul className="grid gap-2 sm:grid-cols-2">
         {group.options.map((option) => (
           <OptionRow
             key={option.id}

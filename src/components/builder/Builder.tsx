@@ -13,6 +13,7 @@ import { GroupSection } from './GroupSection'
 import { PricePreview } from './PricePreview'
 import { QuantityPicker } from './QuantityPicker'
 import { ViolationList } from './ViolationList'
+import { btnDanger, btnPrimary, btnSecondary, card } from '../ui'
 
 const EXPIRED_MESSAGE = 'Reservation expired. Stock was released.'
 
@@ -35,8 +36,7 @@ function withQty(config: Config, optionId: OptionId, qty: number): Config {
   return next
 }
 
-const buttonClass =
-  'rounded bg-slate-900 px-4 py-2 font-medium text-white disabled:cursor-not-allowed disabled:bg-slate-400'
+const buttonClass = btnPrimary
 
 // Everything on screen comes from `menu`: groups, options, prices, limits.
 export function Builder({ menu, onAdded, cartVersion, editing = null, onEditDone }: Props) {
@@ -133,14 +133,14 @@ export function Builder({ menu, onAdded, cartVersion, editing = null, onEditDone
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">
+      <h2 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">
         {editing ? `Editing cart item · ${menu.product.name}` : menu.product.name}
       </h2>
 
       {editing && (
         <div
           role={editExpired ? 'alert' : undefined}
-          className={`rounded-lg border p-3 text-sm ${editExpired ? 'border-amber-300 bg-amber-50 text-amber-900' : 'border-slate-200 bg-white'}`}
+          className={`rounded-xl border p-3 text-sm ${editExpired ? 'border-red-200 bg-red-50 text-red-900' : 'border-primary/30 bg-selected text-primary-hover'}`}
         >
           {editExpired ? (
             <p>
@@ -154,21 +154,28 @@ export function Builder({ menu, onAdded, cartVersion, editing = null, onEditDone
       )}
 
       {menu.groups.map((group) => (
-        <GroupSection key={group.id} group={group} config={config} headroom={headroom} onChange={changeOption} />
+        <GroupSection
+          key={group.id}
+          group={group}
+          config={config}
+          headroom={headroom}
+          violations={violations}
+          onChange={changeOption}
+        />
       ))}
 
       <ViolationList violations={violations} />
 
       {/* The server's answer already lists the shortages; don't say it twice. */}
       {shortages.length > 0 && !failure?.shortages.length && (
-        <p className="text-sm text-red-700">
+        <p className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
           Short: {shortages.map((s) => `${s.missing} ${s.name}`).join(', ')}
         </p>
       )}
 
       <PricePreview preview={preview} />
 
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-white p-4">
+      <div className={`${card} flex flex-wrap items-center gap-3`}>
         <QuantityPicker value={quantity} max={menu.shop.maxItemQuantity} onChange={changeQuantity} />
 
         {editing ? (
@@ -195,7 +202,7 @@ export function Builder({ menu, onAdded, cartVersion, editing = null, onEditDone
             )}
             <button
               type="button"
-              className="rounded border border-slate-300 px-4 py-2 text-slate-700 disabled:opacity-50"
+              className={btnSecondary}
               disabled={busy}
               title={busy ? 'Wait for the request to finish' : undefined}
               onClick={onEditDone}
@@ -203,8 +210,8 @@ export function Builder({ menu, onAdded, cartVersion, editing = null, onEditDone
               Cancel edit
             </button>
             {editExpired
-              ? addReason && <span className="text-sm text-slate-500">{addReason}</span>
-              : saveReason && <span className="text-sm text-slate-500">{saveReason}</span>}
+              ? addReason && <span className="text-sm text-muted">{addReason}</span>
+              : saveReason && <span className="text-sm text-muted">{saveReason}</span>}
           </>
         ) : (
           <>
@@ -217,22 +224,22 @@ export function Builder({ menu, onAdded, cartVersion, editing = null, onEditDone
             >
               Add to cart
             </button>
-            {addReason && <span className="text-sm text-slate-500">{addReason}</span>}
+            {addReason && <span className="text-sm text-muted">{addReason}</span>}
           </>
         )}
       </div>
 
       {addToCart.status === 'added' && (
-        <p role="status" className="text-sm text-green-700">
+        <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-medium text-emerald-700">
           Added to cart.
         </p>
       )}
 
       {failure && (
-        <div role="alert" className="flex flex-wrap items-center gap-2 text-sm text-red-700">
+        <div role="alert" className="flex flex-wrap items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
           <span>{failure.message}</span>
           {failure.canRetry && (
-            <button type="button" className="rounded border border-red-300 px-3 py-1" disabled={busy} onClick={retry}>
+            <button type="button" className={btnDanger} disabled={busy} onClick={retry}>
               Retry
             </button>
           )}

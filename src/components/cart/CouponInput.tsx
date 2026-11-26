@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Menu } from '../../types/menu'
+import { btnSecondary, input } from '../ui'
 
 interface Props {
   menu: Menu
@@ -35,10 +36,11 @@ export function CouponInput({ menu, savedCode, pending, onApply }: Props) {
           if (applyReason === null) onApply(text.trim() === '' ? null : text)
         }}
       >
-        <label className="flex min-w-0 flex-1 flex-col text-sm">
-          <span className="font-medium">Coupon code</span>
+        <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+          <span className="font-medium text-muted">Coupon code</span>
           <input
-            className="rounded border border-slate-300 px-2 py-1"
+            className={`${input} w-full uppercase placeholder:normal-case`}
+            placeholder="Enter code"
             value={text}
             onChange={(event) => setText(event.target.value)}
             autoComplete="off"
@@ -46,7 +48,7 @@ export function CouponInput({ menu, savedCode, pending, onApply }: Props) {
         </label>
         <button
           type="submit"
-          className="rounded border border-slate-300 bg-white px-3 py-1 disabled:opacity-50"
+          className={btnSecondary}
           disabled={applyReason !== null}
           title={applyReason ?? undefined}
         >
@@ -55,7 +57,7 @@ export function CouponInput({ menu, savedCode, pending, onApply }: Props) {
         {savedCode && (
           <button
             type="button"
-            className="rounded border border-slate-300 bg-white px-3 py-1 disabled:opacity-50"
+            className={btnSecondary}
             disabled={pending}
             title={pending ? 'Saving…' : undefined}
             onClick={() => {
@@ -68,7 +70,7 @@ export function CouponInput({ menu, savedCode, pending, onApply }: Props) {
         )}
       </form>
       {timeLimitNotes(menu).map((note) => (
-        <p key={note} className="text-xs text-slate-500">
+        <p key={note} className="text-xs text-muted">
           {note}
         </p>
       ))}

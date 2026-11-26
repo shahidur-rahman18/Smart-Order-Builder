@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { api } from '../../api/client'
 import { ordersToJson } from '../../engine/ordersJson'
+import { btnPrimary } from '../ui'
 
 // Asks the server for the latest orders at click time, then saves them as a file.
 export function DownloadOrdersButton() {
@@ -29,7 +30,7 @@ export function DownloadOrdersButton() {
     <div className="flex flex-wrap items-center gap-2">
       <button
         type="button"
-        className="rounded bg-slate-900 px-4 py-2 font-medium text-white disabled:bg-slate-400"
+        className={btnPrimary}
         disabled={pending}
         title={pending ? 'Preparing the file…' : undefined}
         onClick={download}

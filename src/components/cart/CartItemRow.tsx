@@ -4,6 +4,7 @@ import { useCountdown } from '../../hooks/useCountdown'
 import type { CartItemView } from '../../types/cart'
 import type { Menu } from '../../types/menu'
 import { Countdown } from './Countdown'
+import { btnSecondarySm } from '../ui'
 
 interface Props {
   item: CartItemView
@@ -33,7 +34,7 @@ function UnitDiscounts({ item }: { item: CartItemView }) {
   const { cheapestFree, combo } = item.unit
   if (cheapestFree.discount === 0 && combo.discount === 0) return null
   return (
-    <p className="mt-1 text-xs text-green-700">
+    <p className="mt-1 text-xs font-medium text-emerald-700">
       {cheapestFree.discount > 0 && `${cheapestFree.freeUnits} extra free: − BDT ${formatBdt(cheapestFree.discount)} each item. `}
       {combo.discount > 0 && `Combo: − BDT ${formatBdt(combo.discount)} each item.`}
     </p>
@@ -52,21 +53,21 @@ export function CartItemRow({ item, position, menu, removing, editing, onEdit, o
   return (
     <li
       aria-label={`Cart item ${position}`}
-      className={`rounded-lg border p-3 ${expired ? 'border-slate-200 bg-slate-100 text-slate-500' : 'border-slate-200 bg-white'}`}
+      className={`rounded-xl border p-3 ${expired ? 'border-dashed border-line bg-page text-muted' : 'border-line bg-white'}`}
     >
       <div className="flex items-start justify-between gap-3">
         <p className="min-w-0 text-sm">
           <span className="font-medium">{item.quantity} × </span>
           {describeConfig(item, menu)}
         </p>
-        <p className="shrink-0 text-sm font-medium">BDT {formatBdt(item.lineTotal)}</p>
+        <p className="shrink-0 text-sm font-semibold tabular-nums">BDT {formatBdt(item.lineTotal)}</p>
       </div>
 
       <UnitDiscounts item={item} />
 
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-sm">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm">
         {expired ? (
-          <span className="font-medium">Reservation expired — remove or add again</span>
+          <span className="text-xs font-medium">Reservation expired — remove or add again</span>
         ) : (
           <Countdown msLeft={msLeft} />
         )}
@@ -75,7 +76,7 @@ export function CartItemRow({ item, position, menu, removing, editing, onEdit, o
           {!expired && (
             <button
               type="button"
-              className="rounded border border-slate-300 bg-white px-3 py-1 text-slate-700 disabled:opacity-50"
+              className={btnSecondarySm}
               disabled={editing}
               title={editing ? 'Open in the builder' : undefined}
               onClick={onEdit}
@@ -85,7 +86,7 @@ export function CartItemRow({ item, position, menu, removing, editing, onEdit, o
           )}
           <button
             type="button"
-            className="rounded border border-slate-300 bg-white px-3 py-1 text-slate-700 disabled:opacity-50"
+            className={btnSecondarySm}
             disabled={removing}
             title={removing ? 'Removing…' : undefined}
             onClick={onRemove}

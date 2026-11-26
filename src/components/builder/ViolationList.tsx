@@ -4,7 +4,7 @@ import type { Violation } from '../../types/menu'
 export function ViolationList({ violations }: { violations: Violation[] }) {
   if (violations.length === 0) return null
   return (
-    <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+    <div className="rounded-xl border border-primary/30 bg-selected p-4 text-sm text-primary-hover">
       <p className="font-semibold">Please fix before adding:</p>
       <ul aria-label="Problems" className="mt-1 list-disc pl-5">
         {violations.map((v, index) => (

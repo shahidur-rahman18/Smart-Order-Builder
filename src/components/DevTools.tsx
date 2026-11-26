@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { api } from '../api/client'
+import { btnSecondarySm } from './ui'
 
 interface Props {
   onReset: () => void // the page starts over (cart, builder, orders)
@@ -22,12 +23,12 @@ export function DevTools({ onReset }: Props) {
   }
 
   const reason = pending ? 'Working…' : undefined
-  const buttonClass = 'rounded border border-slate-300 bg-white px-3 py-1 disabled:opacity-50'
+  const buttonClass = btnSecondarySm
 
   return (
-    <footer className="border-t border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-4 py-3 text-sm">
-        <span className="font-medium text-slate-500">Dev tools</span>
+    <footer className="shrink-0 border-t border-line bg-white">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 py-2 text-xs sm:px-6">
+        <span className="font-semibold tracking-wide text-muted uppercase">Dev tools</span>
         <button
           type="button"
           className={buttonClass}
@@ -47,7 +48,7 @@ export function DevTools({ onReset }: Props) {
           Reset demo data
         </button>
         {message && (
-          <span role="status" className="text-slate-600">
+          <span role="status" className="text-muted">
             {message}
           </span>
         )}
