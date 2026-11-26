@@ -33,7 +33,25 @@ export function Header({ tab, onTab, timeZone, cartCount = 0 }: Props) {
               window.scrollTo({ top: 0 })
             }}
           >
-            <span aria-hidden="true" className="h-8 w-8 shrink-0 rounded-lg bg-yolk shadow-sm sm:h-9 sm:w-9 sm:rounded-xl" />
+            <span
+              aria-hidden="true"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-yolk text-ink shadow-sm sm:h-9 sm:w-9 sm:rounded-xl"
+            >
+              {/* Food icon: fork and knife */}
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4 sm:h-5 sm:w-5"
+              >
+                <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+                <path d="M7 2v20" />
+                <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+              </svg>
+            </span>
             <span className="min-w-0 truncate">Smart Order Builder</span>
           </button>
         </h1>
