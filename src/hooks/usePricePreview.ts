@@ -10,7 +10,7 @@ export type PreviewStatus = 'loading' | 'ready' | 'error'
 
 export interface PricePreview {
   status: PreviewStatus
-  body: PriceBody | null // last good answer; while loading or after an error it is old (stale)
+  body: PriceBody | null // last good answer (old while loading); null after an error
   error: string | null
   retry: () => void
 }
@@ -52,8 +52,9 @@ export function usePricePreview(config: Config, quantity: number): PricePreview 
       .catch((err: unknown) => {
         if (controller.signal.aborted) return
         const error = err instanceof Error ? err.message : 'Price is not available right now.'
-        // Keep the last good price (shown as stale) next to the error.
-        setResult((old) => ({ draft: debounced, attempt, body: old.body, error }))
+        // Drop the old price: it belongs to an older draft, so showing it
+        // next to the error would show a price for a config the user no longer has.
+        setResult({ draft: debounced, attempt, body: null, error })
       })
 
     return () => controller.abort()

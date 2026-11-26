@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { api } from '../api/client'
 import { btnSecondaryXs } from './ui'
+
+const MESSAGE_MS = 5000
 
 interface Props {
   onReset: () => void // the page starts over (cart, builder, orders)
@@ -10,6 +12,14 @@ interface Props {
 export function DevTools({ onReset }: Props) {
   const [message, setMessage] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
+
+  // The footer cannot see when the "fail once" is used up, so a message is
+  // only a short confirmation: it hides itself instead of going out of date.
+  useEffect(() => {
+    if (message === null) return
+    const timer = setTimeout(() => setMessage(null), MESSAGE_MS)
+    return () => clearTimeout(timer)
+  }, [message])
 
   function run(action: () => Promise<unknown>, done: string, after?: () => void): void {
     setPending(true)

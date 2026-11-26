@@ -9,7 +9,7 @@ import { formatBdt } from '../../engine/money'
 import { menu } from '../../fixtures'
 import { parsePrice } from '../../mock/parse'
 import { server } from '../../mock/node'
-import { failNextReserve } from '../../server/chaos'
+import { chaos, failNextReserve } from '../../server/chaos'
 import { pricePreview } from '../../server/price'
 import { configByNames } from '../builders'
 
@@ -80,6 +80,28 @@ describe('Builder UI', () => {
     // Let the slow (stale) answer arrive: the screen must not jump back.
     await new Promise((resolve) => setTimeout(resolve, 900))
     expect(screen.getByLabelText('Line total')).toHaveTextContent(bdt(second))
+  })
+
+  it('Price fails → the old config price is not shown; Retry brings the new price', async () => {
+    const user = userEvent.setup()
+    render(<Builder menu={menu} />)
+    await buildValidItem(user)
+    const oldPrice = priceUnit(configByNames({ Toast: 1, Scrambled: 2, 'Chicken Sausage': 1 }), menu).unitPrice
+    await waitFor(() => expect(screen.getByLabelText('Line total')).toHaveTextContent(bdt(oldPrice)))
+
+    chaos.priceFailRate = 1 // every price request fails
+    await user.click(plus('Hash Brown')) // new config, its price request fails
+    await screen.findByRole('button', { name: 'Retry price' })
+    expect(screen.getByLabelText('Line total')).toHaveTextContent('—')
+    expect(screen.queryByText(bdt(oldPrice))).not.toBeInTheDocument()
+
+    chaos.priceFailRate = 0
+    await user.click(screen.getByRole('button', { name: 'Retry price' }))
+    const newPrice = priceUnit(
+      configByNames({ Toast: 1, Scrambled: 2, 'Chicken Sausage': 1, 'Hash Brown': 1 }),
+      menu,
+    ).unitPrice
+    await waitFor(() => expect(screen.getByLabelText('Line total')).toHaveTextContent(bdt(newPrice)))
   })
 
   it('TC-13: triple click on Add → one POST, one cart item', async () => {

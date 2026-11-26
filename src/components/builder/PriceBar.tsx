@@ -97,7 +97,7 @@ export function PriceBar({ menu, preview, quantity, onQuantity, problemCount, ac
           >
             <p className="text-[0.65rem] font-semibold tracking-wider text-orange-200 uppercase">Unit price</p>
             <p className="text-2xl font-bold whitespace-nowrap tabular-nums md:text-xl">
-              {unit ? `BDT ${formatBdt(unit.unitPrice)}` : '…'}
+              {unit ? `BDT ${formatBdt(unit.unitPrice)}` : status === 'error' ? '—' : '…'}
             </p>
             {unit && (
               <p className="mt-0.5 text-xs text-white/60 md:hidden">
