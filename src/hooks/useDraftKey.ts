@@ -31,9 +31,18 @@ export interface RequestFailure {
   shortages: Shortage[]
 }
 
-// What to show for a failed add or edit.
+// Part G: shown when another tab changed the cart first (409 VERSION_CONFLICT).
+export const CONFLICT_MESSAGE = 'The cart was changed in another tab. It has been reloaded: check it and try again.'
+
+export function isConflict(err: unknown): boolean {
+  return err instanceof ApiError && err.code === 'VERSION_CONFLICT'
+}
+
+// What to show for a failed add, edit or pay.
 export function toFailure(err: unknown): RequestFailure {
   if (!(err instanceof ApiError)) return { message: 'Something went wrong.', canRetry: true, shortages: [] }
+  // Not a Retry: the same request would only fail again. The tab reloads instead.
+  if (isConflict(err)) return { message: CONFLICT_MESSAGE, canRetry: false, shortages: [] }
   const canRetry = err.status === 0 || err.status === 503
   const message = err.status === 503 ? 'Could not reserve. Your selection is kept.' : err.message
   return { message, canRetry, shortages: err.body?.shortages ?? [] }

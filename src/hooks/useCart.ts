@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ApiError, api } from '../api/client'
-import type { CartView } from '../types/cart'
+import type { CartItemView, CartView } from '../types/cart'
 import type { CartBreakdown } from '../types/pricing'
+import { CONFLICT_MESSAGE, isConflict } from './useDraftKey'
 
 const REFRESH_EVERY_MS = 5000
 
@@ -9,10 +10,11 @@ export interface CartState {
   cart: CartView | null // null until the first answer
   totals: CartBreakdown | null
   error: string | null
+  conflict: string | null // another tab changed the cart first; kept until our next change (Part G)
   removingId: string | null // the item whose Remove is in flight
   couponPending: boolean
   refresh: () => void
-  remove: (itemId: string) => void
+  remove: (item: CartItemView) => void
   setCoupon: (code: string | null) => void
 }
 
@@ -22,6 +24,7 @@ export function useCart(): CartState {
   const [cart, setCart] = useState<CartView | null>(null)
   const [totals, setTotals] = useState<CartBreakdown | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [conflict, setConflict] = useState<string | null>(null)
   const [removingId, setRemovingId] = useState<string | null>(null)
   const [couponPending, setCouponPending] = useState(false)
 
@@ -47,14 +50,16 @@ export function useCart(): CartState {
   }, [refresh])
 
   const remove = useCallback(
-    (itemId: string) => {
-      setRemovingId(itemId)
+    (item: CartItemView) => {
+      setRemovingId(item.id)
+      setConflict(null)
       api
-        .removeItem(itemId)
+        .removeItem(item.id, item.version)
         .then(() => setError(null))
         .catch((err: unknown) => {
           // 404 = another tab already removed it; the refresh below shows the truth.
-          if (!(err instanceof ApiError && err.status === 404)) setError('Could not remove the item.')
+          if (isConflict(err)) setConflict(CONFLICT_MESSAGE)
+          else if (!(err instanceof ApiError && err.status === 404)) setError('Could not remove the item.')
         })
         .finally(() => {
           setRemovingId(null)
@@ -65,18 +70,31 @@ export function useCart(): CartState {
   )
 
   // The server stores what was typed; priceCart decides if it applies (and says why not).
-  const setCoupon = useCallback((code: string | null) => {
-    setCouponPending(true)
-    api
-      .setCoupon(code)
-      .then((body) => {
-        setCart(body.cart)
-        setTotals(body.totals)
-        setError(null)
-      })
-      .catch(() => setError('Could not save the coupon.'))
-      .finally(() => setCouponPending(false))
-  }, [])
+  // It sends the version this tab is showing (Part G).
+  const cartVersion = cart?.version
+  const setCoupon = useCallback(
+    (code: string | null) => {
+      if (cartVersion === undefined) return // the cart has not loaded yet
+      setCouponPending(true)
+      setConflict(null)
+      api
+        .setCoupon(code, cartVersion)
+        .then((body) => {
+          setCart(body.cart)
+          setTotals(body.totals)
+          setError(null)
+        })
+        .catch((err: unknown) => {
+          // The refresh clears `error`, so the conflict has its own field.
+          if (isConflict(err)) {
+            setConflict(CONFLICT_MESSAGE)
+            refresh()
+          } else setError('Could not save the coupon.')
+        })
+        .finally(() => setCouponPending(false))
+    },
+    [cartVersion, refresh],
+  )
 
-  return { cart, totals, error, removingId, couponPending, refresh, remove, setCoupon }
+  return { cart, totals, error, conflict, removingId, couponPending, refresh, remove, setCoupon }
 }

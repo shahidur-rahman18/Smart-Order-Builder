@@ -14,7 +14,8 @@ export interface Checkout {
 
 // POST /api/checkout. The key belongs to one cart version + payment method:
 // a double click or a Retry sends the same key, so the server makes ONE order (TC-16, D4).
-export function useCheckout(onPaid: (order: StoredOrder) => void): Checkout {
+// onFailed lets the caller reload the cart, e.g. after VERSION_CONFLICT (Part G).
+export function useCheckout(onPaid: (order: StoredOrder) => void, onFailed?: () => void): Checkout {
   const [status, setStatus] = useState<PayStatus>('idle')
   const [failure, setFailure] = useState<RequestFailure | null>(null)
   const [order, setOrder] = useState<StoredOrder | null>(null)
@@ -29,7 +30,7 @@ export function useCheckout(onPaid: (order: StoredOrder) => void): Checkout {
     setFailure(null)
 
     api
-      .checkout({ idempotencyKey, paymentMethod })
+      .checkout({ idempotencyKey, paymentMethod, cartVersion })
       .then((body) => {
         draftKey.reset()
         setOrder(body.order)
@@ -39,6 +40,7 @@ export function useCheckout(onPaid: (order: StoredOrder) => void): Checkout {
       .catch((err: unknown) => {
         setStatus('failed')
         setFailure(toFailure(err))
+        onFailed?.()
       })
       .finally(() => {
         pendingRef.current = false

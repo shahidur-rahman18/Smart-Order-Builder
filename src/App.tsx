@@ -6,6 +6,7 @@ import { DevTools } from './components/DevTools'
 import { Header, type Tab } from './components/Header'
 import { OrdersPanel } from './components/orders/OrdersPanel'
 import { btnDanger } from './components/ui'
+import { clearDraft } from './hooks/draftStorage'
 import { useCart } from './hooks/useCart'
 import { useMenu } from './hooks/useMenu'
 import type { CartItemView } from './types/cart'
@@ -47,6 +48,7 @@ function Shop({ menu }: { menu: Menu }) {
               cartVersion={cart.cart?.version}
               editing={editingItem}
               onEditDone={finishEdit}
+              onEditFailed={cart.refresh}
             />
           </div>
           <div id="cart" className="scroll-mt-32 pb-6 sm:scroll-mt-20 lg:min-h-0 lg:overflow-y-auto lg:pb-0">
@@ -98,7 +100,12 @@ function App() {
         </>
       )}
 
-      <DevTools onReset={() => setResetCount((n) => n + 1)} />
+      <DevTools
+        onReset={() => {
+          clearDraft() // "start again" means the half-built item too
+          setResetCount((n) => n + 1)
+        }}
+      />
     </div>
   )
 }

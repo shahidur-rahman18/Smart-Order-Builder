@@ -54,13 +54,13 @@ describe('api client (through MSW)', () => {
     })
     expect(edited.item.quantity).toBe(2)
 
-    const withCoupon = await api.setCoupon('anything')
+    const withCoupon = await api.setCoupon('anything', edited.cart.version)
     expect(withCoupon.cart.couponCode).toBe('anything')
 
     const cart = await api.getCart()
     expect(cart.totals.lines).toHaveLength(1)
 
-    const removed = await api.removeItem(added.item.id)
+    const removed = await api.removeItem(added.item.id, edited.item.version)
     expect(removed.cart.items).toHaveLength(0)
   })
 
@@ -68,7 +68,11 @@ describe('api client (through MSW)', () => {
     await api.addItem({ idempotencyKey: 'k3', config: configA(), quantity: 1 })
     const before = await api.getOrders()
 
-    const { order } = await api.checkout({ idempotencyKey: 'k4', paymentMethod: 'cash' })
+    const { order } = await api.checkout({
+      idempotencyKey: 'k4',
+      paymentMethod: 'cash',
+      cartVersion: (await api.getCart()).cart.version,
+    })
     expect(order.source).toBe('checkout')
 
     const after = await api.getOrders()
@@ -85,7 +89,7 @@ describe('api client (through MSW)', () => {
   })
 
   it('404 for an unknown cart item', async () => {
-    const error = await apiErrorOf(api.removeItem('no-such-item'))
+    const error = await apiErrorOf(api.removeItem('no-such-item', 1))
     expect(error.status).toBe(404)
     expect(error.code).toBe('NOT_FOUND')
   })

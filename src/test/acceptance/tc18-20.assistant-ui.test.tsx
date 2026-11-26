@@ -90,8 +90,8 @@ async function ask(user: ReturnType<typeof userEvent.setup>, question: string) {
 const conversation = () => screen.getByRole('log', { name: 'Conversation' })
 
 async function checkoutOne(key: string, quantity = 1) {
-  await api.addItem({ idempotencyKey: `${key}-add`, config: configA(), quantity })
-  await api.checkout({ idempotencyKey: `${key}-pay`, paymentMethod: 'cash' })
+  const added = await api.addItem({ idempotencyKey: `${key}-add`, config: configA(), quantity })
+  await api.checkout({ idempotencyKey: `${key}-pay`, paymentMethod: 'cash', cartVersion: added.cart.version })
 }
 
 describe('Sales assistant (Part F)', { timeout: 15_000 }, () => {

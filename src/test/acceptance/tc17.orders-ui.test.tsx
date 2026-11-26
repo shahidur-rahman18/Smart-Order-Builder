@@ -12,8 +12,8 @@ function ordersTable(): HTMLElement {
 }
 
 async function placeOrder(key: string): Promise<string> {
-  await api.addItem({ idempotencyKey: `${key}-add`, config: configB(), quantity: 1 })
-  return (await api.checkout({ idempotencyKey: `${key}-pay`, paymentMethod: 'card' })).order.id
+  const added = await api.addItem({ idempotencyKey: `${key}-add`, config: configB(), quantity: 1 })
+  return (await api.checkout({ idempotencyKey: `${key}-pay`, paymentMethod: 'card', cartVersion: added.cart.version })).order.id
 }
 
 // The whole App with many clicks: slower when all test files run in parallel.

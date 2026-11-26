@@ -23,10 +23,13 @@ interface Props {
 
 export function CartPanel({ menu, cart, editingId, onEdit, onPaid }: Props) {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PAYMENT_METHODS[0])
-  const checkout = useCheckout((order) => {
-    cart.refresh()
-    onPaid?.(order)
-  })
+  const checkout = useCheckout(
+    (order) => {
+      cart.refresh()
+      onPaid?.(order)
+    },
+    cart.refresh, // after any failure, show the cart as it really is now
+  )
   const items = cart.cart?.items ?? []
   const totals = cart.totals
   const paying = checkout.status === 'pending'
@@ -66,6 +69,11 @@ export function CartPanel({ menu, cart, editingId, onEdit, onPaid }: Props) {
             {cart.error}
           </p>
         )}
+        {cart.conflict && (
+          <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            {cart.conflict}
+          </p>
+        )}
         {cart.cart === null && !cart.error && <p className="text-sm text-muted">Loading cart…</p>}
         {cart.cart !== null && items.length === 0 && (
           <p className="rounded-xl border border-dashed border-line p-6 text-center text-sm text-muted">
@@ -84,7 +92,7 @@ export function CartPanel({ menu, cart, editingId, onEdit, onPaid }: Props) {
                 removing={cart.removingId === item.id}
                 editing={editingId === item.id}
                 onEdit={() => onEdit(item)}
-                onRemove={() => cart.remove(item.id)}
+                onRemove={() => cart.remove(item)}
                 onExpired={cart.refresh}
               />
             ))}

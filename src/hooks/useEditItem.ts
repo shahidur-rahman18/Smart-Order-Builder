@@ -3,7 +3,7 @@ import { ApiError, api } from '../api/client'
 import type { ItemBody } from '../types/api'
 import type { CartItemView } from '../types/cart'
 import type { Config } from '../types/menu'
-import { toFailure, useDraftKey, type RequestFailure } from './useDraftKey'
+import { isConflict, toFailure, useDraftKey, type RequestFailure } from './useDraftKey'
 
 export type SaveStatus = 'idle' | 'pending' | 'failed'
 
@@ -11,6 +11,7 @@ export interface EditItem {
   status: SaveStatus
   failure: RequestFailure | null
   expired: boolean // the server said 410 EXPIRED: this item can no longer be saved (D3)
+  conflict: boolean // 409 VERSION_CONFLICT: another tab changed this item first (Part G)
   save: (config: Config, quantity: number) => void
   clearMessage: () => void
 }
@@ -25,6 +26,7 @@ export function useEditItem(
   const [status, setStatus] = useState<SaveStatus>('idle')
   const [failure, setFailure] = useState<RequestFailure | null>(null)
   const [expired, setExpired] = useState(false)
+  const [conflict, setConflict] = useState(false)
   const draftKey = useDraftKey()
   const pendingRef = useRef(false) // blocks a double click before React re-renders
 
@@ -47,6 +49,10 @@ export function useEditItem(
           // Not an error to retry: the builder switches to "Add as new item" (D3).
           setExpired(true)
           setStatus('idle')
+        } else if (isConflict(err)) {
+          // Saving again would overwrite the other tab's change: the edit must start over.
+          setConflict(true)
+          setStatus('idle')
         } else {
           setStatus('failed')
           setFailure(toFailure(err))
@@ -64,5 +70,5 @@ export function useEditItem(
     setFailure(null)
   }
 
-  return { status, failure, expired, save, clearMessage }
+  return { status, failure, expired, conflict, save, clearMessage }
 }

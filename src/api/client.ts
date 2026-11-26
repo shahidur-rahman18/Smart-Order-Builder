@@ -82,8 +82,10 @@ export const api = {
   addItem: (body: AddItemRequest) => request<ItemBody>('POST', '/api/cart/items', body),
   editItem: (itemId: string, body: EditItemRequest) =>
     request<ItemBody>('PUT', `/api/cart/items/${encodeURIComponent(itemId)}`, body),
-  removeItem: (itemId: string) => request<RemoveItemBody>('DELETE', `/api/cart/items/${encodeURIComponent(itemId)}`),
-  setCoupon: (code: string | null) => request<CartBody>('PUT', '/api/cart/coupon', { code }),
+  removeItem: (itemId: string, itemVersion: number) =>
+    request<RemoveItemBody>('DELETE', `/api/cart/items/${encodeURIComponent(itemId)}`, { itemVersion }),
+  setCoupon: (code: string | null, cartVersion: number) =>
+    request<CartBody>('PUT', '/api/cart/coupon', { code, cartVersion }),
   checkout: (body: CheckoutRequest) => request<OrderBody>('POST', '/api/checkout', body),
   getOrders: () => request<OrdersBody>('GET', '/api/orders'),
   // Dev tools only.

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { availableForEdit, optionHeadroom, shortagesFor, usageOf } from '../../engine/stock'
 import { validate } from '../../engine/validate'
 import { useAddToCart } from '../../hooks/useAddToCart'
+import { loadDraft, saveDraft } from '../../hooks/draftStorage'
 import { formatCountdown, useCountdown } from '../../hooks/useCountdown'
 import { useEditItem } from '../../hooks/useEditItem'
 import { usePricePreview } from '../../hooks/usePricePreview'
@@ -18,6 +19,7 @@ import { ViolationList } from './ViolationList'
 import { btnDanger, btnPrimary, btnSecondary } from '../ui'
 
 const EXPIRED_MESSAGE = 'Reservation expired. Stock was released.'
+const CONFLICT_EDIT_MESSAGE = 'This item was changed in another tab. Cancel the edit and open it again from the cart.'
 
 interface Props {
   menu: Menu
@@ -28,6 +30,7 @@ interface Props {
   // `key` per item, so config/quantity below start from this item.
   editing?: CartItemView | null
   onEditDone?: () => void // saved, added as new, or cancelled
+  onEditFailed?: () => void // e.g. reload the cart after a version conflict
 }
 
 // Config keeps only options with qty > 0 (same shape the server expects).
@@ -41,9 +44,17 @@ function withQty(config: Config, optionId: OptionId, qty: number): Config {
 const buttonClass = btnPrimary
 
 // Everything on screen comes from `menu`: groups, options, prices, limits.
-export function Builder({ menu, onAdded, cartVersion, editing = null, onEditDone }: Props) {
-  const [config, setConfig] = useState<Config>(() => editing?.config ?? {})
-  const [quantity, setQuantity] = useState(() => editing?.quantity ?? 1)
+export function Builder({ menu, onAdded, cartVersion, editing = null, onEditDone, onEditFailed }: Props) {
+  // A new item starts from the saved draft (Part G); an edit starts from the cart item.
+  const [startDraft] = useState(() => (editing ? null : loadDraft(menu)))
+  const [config, setConfig] = useState<Config>(() => editing?.config ?? startDraft?.config ?? {})
+  const [quantity, setQuantity] = useState(() => editing?.quantity ?? startDraft?.quantity ?? 1)
+
+  // Keep the unfinished new item, so a refresh does not lose it. An edit is not
+  // saved here: it belongs to its cart item, and Cancel must bring the new item back.
+  useEffect(() => {
+    if (!editing) saveDraft({ config, quantity })
+  }, [editing, config, quantity])
   const stock = useStock()
   const refreshStock = stock.refresh
   useEffect(() => {
@@ -64,13 +75,17 @@ export function Builder({ menu, onAdded, cartVersion, editing = null, onEditDone
       stock.refresh()
       onEditDone?.()
     },
-    stock.refresh,
+    () => {
+      stock.refresh()
+      onEditFailed?.()
+    },
   )
 
   // D3: in edit mode, count down with server time; at 0 (or a 410) Save is over.
   const msLeft = useCountdown(editing?.expiresAt ?? null)
   const editExpired = editing !== null && (msLeft === 0 || editItem.expired)
   const canSave = editing !== null && !editExpired
+  const editConflict = canSave && editItem.conflict
 
   // Stock this draft may use. While an edit can still be saved, the item's own
   // share counts as available to it (net difference, same as the server).
@@ -129,6 +144,7 @@ export function Builder({ menu, onAdded, cartVersion, editing = null, onEditDone
   const saving = editItem.status === 'pending'
   const addReason = draftProblem ?? (adding ? 'Adding…' : null)
   let saveReason: string | null = editExpired ? EXPIRED_MESSAGE : draftProblem
+  if (editConflict) saveReason = 'Changed in another tab'
   if (saveReason === null && saving) saveReason = 'Saving…'
 
   // The failure that belongs to the button on screen.
@@ -197,6 +213,12 @@ export function Builder({ menu, onAdded, cartVersion, editing = null, onEditDone
           Base price BDT {formatBdt(menu.product.basePrice)} · stock and price update live
         </p>
       </div>
+
+      {editConflict && (
+        <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          {CONFLICT_EDIT_MESSAGE}
+        </p>
+      )}
 
       {editing && (
         <div
