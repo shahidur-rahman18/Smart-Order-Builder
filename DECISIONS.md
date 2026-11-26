@@ -1,20 +1,9 @@
 # DECISIONS
 
-<!--
-এই ফাইলটা পুরোটা তোমার নিজের ভাষায় লিখবে। প্রতিটা উত্তর ৩–৬ বাক্যে। ইংরেজিতে লেখো, কারণ reviewer ইংরেজি পড়বে।
-কী লিখবে: কী ঠিক করলে, কেন করলে, আর কোডের কোন জায়গায় সেটা আছে (ফাইল বা function-এর নাম)।
-নিচের "Think about" প্রশ্নগুলো শুধু ভাবার সুবিধার জন্য। লেখা শেষ হলে প্রশ্নগুলো মুছে দিয়ো।
--->
-
 ## ✋ C1 — Why not floats, and how VAT 75.48 is rounded
-Decimal numbers in JS are not exact, for example `0.1 + 0.2` gives `0.30000000000000004`. These small errors add up over line totals, discounts and VAT, and can make the payable amount wrong and cause payment problems. So I keep all money as whole numbers in poisha (1 BDT = 100 poisha), for example BDT 679.50 is stored as `67950`.
-
-VAT in TC-06: the discounted subtotal is 150950 poisha. 150950 × 5 = 754750, and 754750 / 100 = 7547.50 poisha. I round half up (.5 or more goes up), so it becomes 7548 poisha = BDT 75.48. This is done by `percentOf()`, which calls `roundHalfUp()` in `src/engine/money.ts`. It uses only integer math, `Math.floor((2 × 754750 + 100) / 200) = 7548`, so no decimal number is created on the way.
-
-Payable = 150950 + 7548 = 158498 poisha = BDT 1584.98. `toWholeBdtPoisha(158498)` rounds it to the nearest whole taka: 158500 poisha = BDT 1585.
+JavaScript decimals are not exact (`0.1 + 0.2` gives `0.30000000000000004`, and in TC-06 `1509.50 × 0.05` gives `75.47500000000001`), so these tiny errors add up across line totals, discounts and VAT, and the half-up rounding of the payable becomes a matter of luck. To avoid this I keep all money as whole numbers in poisha (1 BDT = 100 poisha), so BDT 679.50 is stored as `67950`. In TC-06 the discounted subtotal is 150950 poisha, and 5% VAT is 150950 × 5 / 100 = 7547.5 poisha, which rounds half up to 7548 poisha = BDT 75.48. This is done by `percentOf()` → `roundHalfUp()` in `src/engine/money.ts` using only integer math (`Math.floor((2 × 754750 + 100) / 200) = 7548`), so no decimal is ever created along the way. The payable is 150950 + 7548 = 158498 poisha (BDT 1,584.98), and `toWholeBdtPoisha()` rounds it to 158500 poisha = BDT 1,585.
 
 ## ✋ C2 — Bot questions → functions
-<!-- A table: question | function name | inputs | output. Must match src/assistant/tools.ts exactly. -->
 
 The bot never does any maths itself. Every supported question has one pure function in
 `src/assistant/stats.ts`. These functions never fetch data; they only work on the order list they are given.
@@ -52,7 +41,6 @@ Gemini only picks which function to call and turns the result into one sentence.
 When Tab B takes the last available eggs, Tab A's save must fail with a `409 OUT_OF_STOCK` because the stock has changed. The screen shows which ingredients are short and by how much, but all the user's unsaved changes remain intact. The user can update their selection and try saving again. The server rechecks stock atomically to prevent overselling.
 
 ## ◆ D2 — When is a price locked?
-<!-- Think about: Add to cart vs checkout vs never. How does TC-06 (10:59:59) vs TC-07 (11:00:00) behave with your choice? What does the cart show before Pay? -->
 I lock the price when the user clicks Pay, not when the item goes into the cart. It is like a shop counter: you get the offer that is running when you pay. So if someone adds an item at 10:58 and pays at 11:02, they don't get MORNING15, because the coupon only works before 11:00 (TC-06, TC-07). This means the cart price can change, so I show a small message in the cart that the coupon ends at 11. I always use the server clock, because browser time can be different on every device.
 
 ## ◆ D3 — Reservation expires during an edit
@@ -61,32 +49,12 @@ If a reservation expires while the user is editing, their changes stay on screen
 In the cart, the item is marked "Expired" and can only be removed. The user can choose "Add as new item" to check stock again; if stock is available, the item is added, otherwise the shortage is shown.
 
 ## ◆ D4 — Order id/timestamp and double-click on Pay
-<!-- Think about: Why should the server (not the browser) create the id and createdAt? How does the idempotency key work? What else stops the second click? -->
 The server generates the order ID using `crypto.randomUUID()` and creates the timestamp using its own clock, so the browser's clock difference cannot affect the order time. Reusing the same idempotency key returns the previous result instead of creating another order. After a successful checkout, the cart is cleared, so a later request with a new key returns `409 CART_EMPTY` because no active items remain. The Pay button stays disabled while the request is pending.
 
 ## ◆ D5 — "Who is our best customer?"
-<!-- Think about: What exactly does the bot reply? Which two things stop it inventing a name (no tool + system prompt)? How is it tested (TC-20)? -->
-Orders do not store any customer identity, so the bot says it plainly: the order data has no customer
-names or contact details, so it cannot tell who the best customer is. It then lists what it can answer,
-so the user is not left empty-handed.
-
-Three things stop it from inventing a name:
-
-1. **Nothing in the data or the tools.** `StoredOrder` has no customer field, and there is no tool that
-   returns customers. There is simply no source for a name.
-2. **"Not available" comes from code.** The `describeData` tool returns a `notInData` list (customer
-   names or identity, phone numbers, emails, addresses and so on), so the "we don't have that" answer
-   comes from our code, not from the model's guess.
-3. **System prompt rule.** Gemini must answer only from tool results and never invent a name or a number.
-   If no tool fits, it calls `describeData` and says the data does not contain that.
-
-**Proof:** TC-20 (Gemini mocked) checks that the answer says the order data has no customer information,
-that no customer tool is in the tool list sent to Gemini, and that the system prompt contains the
-"never invent" rule. I also tried it in the browser with a real Gemini key: the bot called `describeData`,
-explained what is missing, and did not invent a name.
+Orders do not store any customer identity, so the bot says plainly that the order data has no customer names or contact details and it cannot tell who the best customer is, and lists what it can answer instead. It cannot invent a name because there is no source for one: `StoredOrder` has no customer field, and no tool returns customers. The "not available" answer comes from code, not from the model's guess, because the `describeData` tool returns a `notInData` list (customer names or identity, phone numbers, emails, addresses and so on). The system prompt also tells Gemini to answer only from tool results and never invent a name or a number; if no tool fits, it calls `describeData` and says the data does not contain that. TC-20 (Gemini mocked) checks that the answer says the order data has no customer information, that no customer tool is in the tool list sent to Gemini, and that the system prompt contains the "never invent" rule. I also tried it in the browser with a real Gemini key: the bot called `describeData`, explained what is missing, and did not invent a name.
 
 ## ◆ D6 — Stored order JSON shape
-<!-- Paste the real shape from src/types/order.ts. Explain: money unit, why totals are stored, how a coupon entered but not applied is recorded (status + reason). -->
 All order amounts are stored as integer poisha to avoid decimal calculation errors. Order totals are saved at checkout so that future price or promotion changes do not affect past orders or receipts. The coupon record keeps the entered code, whether it was applied, its status, and the reason if it was not applied.
 
 Example (seed order ORD-1006, as stored):
@@ -126,11 +94,3 @@ Example (seed order ORD-1006, as stored):
   "pricingWarnings": []
 }
 ```
-
-## Extra decisions (short, 1–3 sentences each)
-<!-- Small choices the brief leaves open. Keep only the ones you really made. -->
-- **Seed orders and stock:**
-- **Rounding of the P1 discount (round the discount, then subtract):**
-- **Does an edit renew the 5-minute reservation?**
-- **"How many more can be added" = stock-based headroom (group limits shown separately as violations):**
-- **Coupon code matching (trim + case-insensitive?):**

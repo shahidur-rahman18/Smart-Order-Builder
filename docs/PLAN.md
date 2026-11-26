@@ -149,7 +149,7 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 - [x] `src/answers/answers.test.ts` prints Q1–Q8 (each with `console.log` + assertions)
 - [x] `ANSWERS.md`: every answer + the command (`npm run answers`) + test name; step-by-step working for Q3 and Q8
 - [x] `README.md`: setup, architecture, engines, assistant tools, trade-offs, unfinished, **actual hours**
-- [ ] Re-read DECISIONS.md against the code with the user (prompt 5 in START-HERE). Each answer 3–6 sentences.
+- [x] Re-read DECISIONS.md against the code with the user (prompt 5 in START-HERE). Each answer 3–6 sentences.
 - [ ] `npm test`, `npm run typecheck`, `npm run lint`, `npm run check:hardcode`, `npm run build` all clean
 - [ ] Fresh clone test: clone → `npm install` → `.env.local` → `npm run dev` works
 - [ ] `git log --oneline` looks like small meaningful commits; no `.env.local` in history
@@ -239,3 +239,5 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 26 Nov — Step 10 and Step 11 marked done (user confirmed the 375px check / UI is his own). Next: Step 12, after the user says go.
 26 Nov 15:35 — Step 12 part (a): src/answers/answers.test.ts (Q1 C max 2 by cheese; Q2 brute force over all 535,680 valid configs → Toast, Fried x2, Tofu = 360.00, ties with +Ketchup, 60 s timeout ~11 s; Q3 A x3 + MORNING15: 10:30 → 1,040, 11:30 → 1,197; Q4 1,600; Q5 total 4,995; Q6 Fried 10; Q7 card 2,145; Q8 3 of 4, ORD-1006 after 11:00). npm run answers uses --silent=false (Vitest 5 hides logs of passing tests). ANSWERS.md written. 232 tests green, typecheck/lint/hardcode clean.
 26 Nov — Step 12 part (b): README.md written (setup, architecture, engines, assistant, tests, trade-offs, unfinished = Part G, hours 32–35 given by the user).
+26 Nov — DECISIONS checked against code (all match; D6 example = real ORD-1006). Extra decisions section removed (not in SPEC, user chose not to write it). C1 and D5 replaced with the user's own shorter text (5 and 6 sentences; one phrase in D5 changed and code names put in backticks at his request). Template comments still in the file.
+26 Nov — DECISIONS template comments removed; Step 12 DECISIONS item ticked.
