@@ -105,7 +105,7 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 
 ## ✅ Step 8 — MSW handlers + API client (≈1 h)
 - [x] `mock/handlers.ts` (all endpoints from ARCHITECTURE §6, latency + chaos), `mock/browser.ts`, `mock/node.ts`
-- [x] `main.tsx`: `await worker.start({ onUnhandledRequest: 'bypass' })` then render (bypass = Gemini calls go to the real internet)
+- [x] `main.tsx`: `await worker.start({ onUnhandledFrame: 'bypass' })` (MSW 3 name; MSW is loaded with a dynamic `import()`) then render (bypass = Gemini calls go to the real internet)
 - [x] `test/setup.ts`: start node server, latency 0, chaos off
 - [x] `api/client.ts` (typed, `ApiError { status, code, body }`), `api/serverClock.ts`
 - [x] Tests: client parses each endpoint; offset ≈ +90 s
@@ -145,15 +145,15 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 - [x] **User writes D5 in DECISIONS.md**
 **Commit:** `feat(assistant): gemini function-calling sales assistant (TC-18..20)`
 
-## Step 12 — Answers, docs, final check (≈2 h)
+## ✅ Step 12 — Answers, docs, final check (≈2 h)
 - [x] `src/answers/answers.test.ts` prints Q1–Q8 (each with `console.log` + assertions)
 - [x] `ANSWERS.md`: every answer + the command (`npm run answers`) + test name; step-by-step working for Q3 and Q8
 - [x] `README.md`: setup, architecture, engines, assistant tools, trade-offs, unfinished, **actual hours**
 - [x] Re-read DECISIONS.md against the code with the user (prompt 5 in START-HERE). Each answer 3–6 sentences.
-- [ ] `npm test`, `npm run typecheck`, `npm run lint`, `npm run check:hardcode`, `npm run build` all clean
-- [ ] Fresh clone test: clone → `npm install` → `.env.local` → `npm run dev` works
-- [ ] `git log --oneline` looks like small meaningful commits; no `.env.local` in history
-- [ ] SPEC coverage checklist below fully ticked
+- [x] `npm test`, `npm run typecheck`, `npm run lint`, `npm run check:hardcode`, `npm run build` all clean
+- [x] Fresh clone test: clone → `npm install` → `.env.local` → `npm run dev` works
+- [x] `git log --oneline` looks like small meaningful commits; no `.env.local` in history
+- [x] SPEC coverage checklist below fully ticked
 **Commit:** `docs: answers, readme and decisions`
 
 ## Step 13 — Bonus, Part G (only if Step 12 is done)
@@ -180,28 +180,28 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 | 18–20 | – | – | 11 |
 
 ## SPEC coverage checklist (tick in Step 12)
-- [ ] Every fixture value comes from `/api/menu`; alt fixture test passes; hardcode check clean (option **names** included)
-- [ ] validate returns **all** violations with id + message; Add disabled while any exist
-- [ ] Each option shows remaining units, disabled at 0
-- [ ] Quantity 1–3 multiplies usage
-- [ ] Edit uses net difference; never releases more than the item holds
-- [ ] All shortages listed with exact amounts
-- [ ] `priceCart` is the **same function** used by the server and the tests
-- [ ] **Full price breakdown visible in UI** (subtotal, each discount, VAT, payable)
-- [ ] Preview: debounce 300 ms, latency 200–1500 ms, 15 % failure, stale ignored, Retry keeps config
-- [ ] Idempotent Add; atomic reserve; 5 min TTL; server clock +90 s from `serverTime`
-- [ ] Expired item: stock released, read-only, **removable**
-- [ ] Edit = one atomic server call
-- [ ] TC-08: new egg item blocked **with reason**
-- [ ] Checkout: one order, atomic, reserved → sold, cart empties; payment label only
-- [ ] Orders survive refresh, include totals; seed priced at createdAt; Download orders.json
-- [ ] Bot: 7 questions via function calling; numbers from code; no raw orders sent; fresh data every call; "don't know" path; 4 error messages; stats tested on seed; Gemini mocked
-- [ ] `.env.example` only; real key never committed; new key ready for the form
-- [ ] DECISIONS: C1, C2, D1–D6, **3–6 sentences each, own words**, matches code
-- [ ] ANSWERS: Q1–Q8 with the **command/test that prints each**; Q3 & Q8 step-by-step
-- [ ] README: setup, architecture, engines, tools, trade-offs, unfinished, actual hours
-- [ ] UI plain, clean, **responsive**
-- [ ] One command runs all tests
+- [x] Every fixture value comes from `/api/menu`; alt fixture test passes; hardcode check clean (option **names** included)
+- [x] validate returns **all** violations with id + message; Add disabled while any exist
+- [x] Each option shows remaining units, disabled at 0
+- [x] Quantity 1–3 multiplies usage
+- [x] Edit uses net difference; never releases more than the item holds
+- [x] All shortages listed with exact amounts
+- [x] `priceCart` is the **same function** used by the server and the tests
+- [x] **Full price breakdown visible in UI** (subtotal, each discount, VAT, payable)
+- [x] Preview: debounce 300 ms, latency 200–1500 ms, 15 % failure, stale ignored, Retry keeps config
+- [x] Idempotent Add; atomic reserve; 5 min TTL; server clock +90 s from `serverTime`
+- [x] Expired item: stock released, read-only, **removable**
+- [x] Edit = one atomic server call
+- [x] TC-08: new egg item blocked **with reason**
+- [x] Checkout: one order, atomic, reserved → sold, cart empties; payment label only
+- [x] Orders survive refresh, include totals; seed priced at createdAt; Download orders.json
+- [x] Bot: 7 questions via function calling; numbers from code; no raw orders sent; fresh data every call; "don't know" path; 4 error messages; stats tested on seed; Gemini mocked
+- [x] `.env.example` only; real key never committed; new key ready for the form
+- [x] DECISIONS: C1, C2, D1–D6, **3–6 sentences each, own words**, matches code
+- [x] ANSWERS: Q1–Q8 with the **command/test that prints each**; Q3 & Q8 step-by-step
+- [x] README: setup, architecture, engines, tools, trade-offs, unfinished, actual hours
+- [x] UI plain, clean, **responsive**
+- [x] One command runs all tests
 
 ---
 
@@ -241,3 +241,4 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 26 Nov — Step 12 part (b): README.md written (setup, architecture, engines, assistant, tests, trade-offs, unfinished = Part G, hours 32–35 given by the user).
 26 Nov — DECISIONS checked against code (all match; D6 example = real ORD-1006). Extra decisions section removed (not in SPEC, user chose not to write it). C1 and D5 replaced with the user's own shorter text (5 and 6 sentences; one phrase in D5 changed and code names put in backticks at his request). Template comments still in the file.
 26 Nov — DECISIONS template comments removed; Step 12 DECISIONS item ticked.
+26 Nov 19:50 — Step 12 final check: test (233) / typecheck / lint / check:hardcode / build clean. Build warned 'chunk > 500 kB' → main.tsx loads MSW with a dynamic import() (main 279 kB + mock 416 kB, no warning). Fresh clone: install + build ok, dev server serves; .env.example = VITE_GEMINI_API_KEY= only; .env.local never in history, no key string in any commit. 32 small commits. SPEC coverage all ticked. README test count 232 → 233.

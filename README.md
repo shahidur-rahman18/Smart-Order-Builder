@@ -191,7 +191,7 @@ Tests mock Gemini (`gemini.test.ts` and a fake Gemini on MSW in `tc18-20.assista
 
 ## 5. Tests
 
-`npm test` runs everything (28 files, 232 tests).
+`npm test` runs everything (28 files, 233 tests).
 
 | Where | What |
 |---|---|
