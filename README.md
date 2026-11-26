@@ -5,9 +5,9 @@ with promotions, checkout and orders, and a Gemini sales assistant.
 React + TypeScript (strict) + Vite + Tailwind. The backend is a mock server that runs in the browser
 through MSW (Mock Service Worker) and keeps its state in `localStorage`.
 
+- Live demo: https://smart-order-builder-1xia.vercel.app/ (each visitor's cart and orders live in their own browser)
 - Decisions (C1, C2, D1–D6): [DECISIONS.md](DECISIONS.md)
 - Answers to Q1–Q8 with the commands that print them: [ANSWERS.md](ANSWERS.md)
-- The original brief: [docs/SPEC.md](docs/SPEC.md)
 
 ---
 
@@ -234,7 +234,6 @@ Test items A, B and C are built from option **names** (`src/test/builders.ts`), 
   - There is no cart-level `version` on every mutation. Only an edit carries the item's version
     (`VERSION_CONFLICT`).
   - The unfinished builder config is not saved to `localStorage`, so it is lost on refresh.
-- No live demo URL.
 - No real backend or database (see Trade-offs).
 
 ---
