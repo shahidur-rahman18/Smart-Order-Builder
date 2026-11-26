@@ -30,7 +30,7 @@ export function OptionRow({ option, qty, headroom, onChange }: Props) {
   // `lg:contents` lets the price and stock spans become grid cells on desktop.
   return (
     <li
-      className={`grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 rounded-xl border px-3 py-2 transition-colors lg:gap-x-1 lg:gap-y-0.5 lg:rounded-lg lg:px-2 lg:py-1 ${look}`}
+      className={`grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 rounded-xl border px-3 py-1.5 transition-colors sm:py-2 lg:gap-x-1 lg:gap-y-0.5 lg:rounded-lg lg:px-2 lg:py-1 ${look}`}
     >
       <p className="min-w-0 text-sm leading-tight font-semibold wrap-break-word text-ink lg:text-[0.78rem]">
         {option.name}

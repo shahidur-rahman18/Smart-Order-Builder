@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api/client'
-import { btnSecondaryXs } from './ui'
+import { btnDevXs } from './ui'
 
 const MESSAGE_MS = 5000
 
@@ -33,7 +33,7 @@ export function DevTools({ onReset }: Props) {
   }
 
   const reason = pending ? 'Working…' : undefined
-  const buttonClass = btnSecondaryXs
+  const buttonClass = btnDevXs
 
   return (
     <footer className="shrink-0 border-t border-line bg-white">

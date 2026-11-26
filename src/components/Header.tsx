@@ -16,15 +16,30 @@ interface Props {
 }
 
 const iconButton =
-  'relative inline-flex h-10 min-w-10 items-center justify-center gap-2 rounded-xl bg-ink px-3 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+  'relative inline-flex h-9 min-w-9 sm:h-10 sm:min-w-10 items-center justify-center gap-2 rounded-xl bg-ink px-3 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
 
 export function Header({ tab, onTab, timeZone, cartCount = 0 }: Props) {
   return (
     // Sticky on phones and tablets (the page scrolls there); on desktop only the middle scrolls.
     <header className="sticky top-0 z-30 shrink-0 border-b border-line bg-white">
-      <div className="mx-auto flex max-w-screen-2xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2 sm:flex-nowrap sm:px-6">
-        <span aria-hidden="true" className="h-9 w-9 shrink-0 rounded-xl bg-yolk shadow-sm" />
-        <h1 className="min-w-0 truncate text-base font-bold tracking-tight sm:text-lg">Smart Order Builder</h1>
+      <div className="mx-auto flex max-w-screen-2xl flex-wrap items-center gap-x-2 gap-y-1.5 px-4 py-1.5 sm:gap-x-3 sm:py-2 sm:flex-nowrap sm:px-6">
+        {/* Logo + title = the home button: back to Build, at the top of the page.
+            The button sits inside the h1 because a heading may not go inside a button. */}
+        <h1 className="min-w-0 flex-1 basis-0 text-sm font-bold tracking-tight sm:flex-initial sm:text-lg">
+          <button
+            type="button"
+            className="flex max-w-full cursor-pointer items-center gap-2 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-default sm:gap-3"
+            disabled={!onTab}
+            title={onTab ? 'Go to the home page' : undefined}
+            onClick={() => {
+              onTab?.('build')
+              window.scrollTo({ top: 0 })
+            }}
+          >
+            <span aria-hidden="true" className="h-8 w-8 shrink-0 rounded-lg bg-yolk shadow-sm sm:h-9 sm:w-9 sm:rounded-xl" />
+            <span className="min-w-0 truncate">Smart Order Builder</span>
+          </button>
+        </h1>
 
         {/* Phones: the page tabs get their own full-width row under the title. */}
         {tab && onTab && (
@@ -66,7 +81,7 @@ export function Header({ tab, onTab, timeZone, cartCount = 0 }: Props) {
           <a
             href="#cart"
             aria-label={`Cart, ${cartCount} items`}
-            className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-white text-ink lg:hidden"
+            className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border sm:h-10 sm:w-10 border-line bg-white text-ink lg:hidden"
           >
             <span aria-hidden="true">🛒</span>
             {cartCount > 0 && (

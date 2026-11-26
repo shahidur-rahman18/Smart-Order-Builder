@@ -82,12 +82,17 @@ export function ChatPanel({ timeZone }: { timeZone: string }) {
         </p>
       )}
 
-      <div className="mb-2 flex flex-wrap gap-1.5" aria-label="Example questions" role="group">
+      {/* Phones and small tablets: one row you swipe sideways, so the chat keeps the screen. From md: wraps. */}
+      <div
+        className="-mx-3 mb-2 flex gap-1.5 overflow-x-auto px-3 [scrollbar-width:none] md:mx-0 md:flex-wrap md:px-0"
+        aria-label="Example questions"
+        role="group"
+      >
         {EXAMPLE_QUESTIONS.map((question) => (
           <button
             key={question}
             type="button"
-            className={btnSecondarySm}
+            className={`${btnSecondarySm} shrink-0 whitespace-nowrap md:shrink`}
             disabled={blockedReason !== null}
             title={blockedReason ?? undefined}
             onClick={() => send(question)}

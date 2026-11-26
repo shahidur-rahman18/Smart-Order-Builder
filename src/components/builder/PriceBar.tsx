@@ -44,7 +44,7 @@ export function PriceBar({ menu, preview, quantity, onQuantity, problemCount, ac
   return (
     <section
       aria-label="Price"
-      className="-mx-4 rounded-t-2xl bg-ink px-4 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] text-white shadow-[0_-8px_24px_rgba(0,0,0,0.15)] sm:mx-0 sm:rounded-2xl sm:pb-2.5 lg:py-2 lg:shadow-lg"
+      className="-mx-4 rounded-t-2xl bg-ink px-4 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:pt-2.5 text-white shadow-[0_-8px_24px_rgba(0,0,0,0.15)] sm:mx-0 sm:rounded-2xl sm:pb-2.5 lg:py-2 lg:shadow-lg"
     >
       {/* Row 1: status on the left, price freshness (or a price error) on the right. */}
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
@@ -74,11 +74,12 @@ export function PriceBar({ menu, preview, quantity, onQuantity, problemCount, ac
         )}
       </div>
 
-      {/* Row 2: breakdown | unit price | quantity | button. One line from lg up. */}
-      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2.5 lg:flex-nowrap">
+      {/* Row 2: breakdown | unit price | quantity | button. One line from lg up.
+          The 4-box breakdown needs xl width; below that a one-line summary sits under the price. */}
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 sm:mt-2 sm:gap-y-2.5 lg:flex-nowrap">
         {unit && (
           <dl
-            className={`hidden flex-1 grid-cols-4 gap-3 border-r border-white/15 pr-4 text-sm transition-opacity md:grid ${stale ? 'opacity-50' : ''}`}
+            className={`hidden flex-1 grid-cols-4 gap-3 border-r border-white/15 pr-4 text-sm transition-opacity xl:grid ${stale ? 'opacity-50' : ''}`}
           >
             <Figure label="Base" value={formatBdt(unit.base)} />
             <Figure label="Options" value={`+${formatBdt(unit.optionsTotal)}`} />
@@ -96,11 +97,11 @@ export function PriceBar({ menu, preview, quantity, onQuantity, problemCount, ac
             className={`min-w-0 transition-opacity md:rounded-xl md:border md:border-primary/60 md:bg-primary/15 md:px-3 md:py-1.5 ${stale ? 'opacity-50' : ''}`}
           >
             <p className="text-[0.65rem] font-semibold tracking-wider text-orange-200 uppercase">Unit price</p>
-            <p className="text-2xl font-bold whitespace-nowrap tabular-nums md:text-xl">
+            <p className="text-xl font-bold whitespace-nowrap tabular-nums sm:text-2xl md:text-xl">
               {unit ? `BDT ${formatBdt(unit.unitPrice)}` : status === 'error' ? '—' : '…'}
             </p>
             {unit && (
-              <p className="mt-0.5 text-xs text-white/60 md:hidden">
+              <p className="mt-0.5 hidden text-xs text-white/60 sm:block xl:hidden">
                 Base {formatBdt(unit.base)} · Options +{formatBdt(unit.optionsTotal)}
                 {unit.cheapestFree.discount > 0 && ` · Extras deal −${formatBdt(unit.cheapestFree.discount)}`}
                 {unit.combo.applied && ` · ${comboLabel(menu)} −${formatBdt(unit.combo.discount)}`}
@@ -125,10 +126,10 @@ export function PriceBar({ menu, preview, quantity, onQuantity, problemCount, ac
         </div>
 
         <div className="w-full md:w-auto md:min-w-48 lg:w-52 lg:shrink-0">
-          <div className="flex flex-wrap gap-2 [&>button]:h-11 [&>button]:flex-1 [&>button]:rounded-xl md:[&>button]:h-10 md:[&>button]:rounded-lg [&>button:disabled]:bg-white/10 [&>button:disabled]:text-white/45">
+          <div className="flex flex-wrap gap-2 [&>button]:h-10 [&>button]:flex-1 [&>button]:rounded-xl sm:[&>button]:h-11 md:[&>button]:h-10 md:[&>button]:rounded-lg [&>button:disabled]:bg-white/10 [&>button:disabled]:text-white/45">
             {actions}
           </div>
-          <p className="mt-1 text-center text-[0.7rem] leading-tight text-white/50">
+          <p className="mt-0.5 text-center text-[0.7rem] leading-tight text-white/50 sm:mt-1">
             Line total{' '}
             <output aria-label="Line total" className="tabular-nums">
               {!body || body.lineTotal === null ? '—' : `BDT ${formatBdt(body.lineTotal)}`}

@@ -30,8 +30,11 @@ export const btnSecondaryCompact = `${buttonBase} h-9 px-3.5 text-sm ${secondary
 // Small second action inside a list row: Edit, Remove, dev tools.
 export const btnSecondarySm = `${buttonBase} h-9 px-3 text-xs ${ghostColours}`
 
-// Tiny second action in the dev tools footer.
+// Tiny second action inside a cart row.
 export const btnSecondaryXs = `${buttonBase} h-7 px-2.5 text-xs ${ghostColours}`
+
+// Dev tools footer buttons: tinted with the theme colour so they read as buttons.
+export const btnDevXs = `${buttonBase} h-7 cursor-pointer border border-primary/40 bg-selected px-2.5 text-xs text-primary-hover hover:border-primary hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-50`
 
 // Small Retry/Try again next to an error.
 export const btnDanger = `${buttonBase} h-8 border border-red-300 bg-white px-3 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50`

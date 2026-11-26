@@ -216,8 +216,11 @@ export function Builder({ menu, onAdded, cartVersion, editing = null, onEditDone
 
       <GroupTabs groups={menu.groups} statuses={statuses} />
 
-      {/* Desktop: every group in one row, one equal column each (the count comes from the data). */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:auto-cols-[minmax(0,1fr)] lg:grid-flow-col lg:grid-cols-none lg:gap-2.5">
+      {/* Desktop: as many equal columns as fit, each at least 11.5rem so names never break mid-word;
+          the rest wrap to the next row (the group count still comes from the data).
+          When two rows do not fit the screen, only this grid scrolls (`min-h-0` lets it shrink);
+          the problem list and the price bar below it stay in view. */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:min-h-0 lg:grid-cols-[repeat(auto-fit,minmax(11.5rem,1fr))] lg:gap-2.5 lg:overflow-y-auto lg:[scrollbar-width:thin]">
         {menu.groups.map((group, index) => (
           <GroupSection
             key={group.id}
@@ -230,10 +233,18 @@ export function Builder({ menu, onAdded, cartVersion, editing = null, onEditDone
         ))}
       </div>
 
-      {/* The message area: takes the free space, so a new problem never pushes the page. */}
-      <div className="flex flex-col gap-2 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:[scrollbar-width:thin]">
-        <ViolationList violations={problems} groups={menu.groups} />
+      {/* Phones and tablets: moved to the top (order-first) and stuck just under the header,
+          so the problems stay in view while scrolling. The top values are the header's height
+          (two rows below sm, one row from sm). Desktop: back in place under the groups. */}
+      {problems.length > 0 && (
+        <div className="sticky top-[91px] z-20 order-first -mx-4 bg-page px-4 py-1.5 sm:top-[57px] sm:py-2 sm:-mx-6 sm:px-6 lg:static lg:order-none lg:mx-0 lg:p-0">
+          <ViolationList violations={problems} groups={menu.groups} />
+        </div>
+      )}
 
+      {/* The message area: takes the free space. `min-h-fit` keeps it from being squeezed to
+          nothing when space is short; the group grid above shrinks and scrolls instead. */}
+      <div className="flex flex-col gap-2 lg:min-h-fit lg:flex-1 lg:overflow-y-auto lg:[scrollbar-width:thin]">
         {/* The server's answer already lists the shortages; don't say it twice. */}
         {shortages.length > 0 && !failure?.shortages.length && (
           <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
