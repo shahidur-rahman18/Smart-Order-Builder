@@ -18,16 +18,29 @@ const ghostColours = 'border border-line bg-white text-ink hover:bg-page disable
 // Main action: Add to cart, Save, Pay.
 export const btnPrimary = `${buttonBase} h-10 px-4 text-sm ${primaryColours}`
 
+// The one big button at the end of a flow: Pay.
+export const btnPrimaryLg = `${buttonBase} h-11 px-5 text-[0.95rem] ${primaryColours}`
+
 // Second action: Apply, Cancel, Download.
 export const btnSecondary = `${buttonBase} h-10 px-4 text-sm ${secondaryColours}`
+
+// Compact second action next to a compact input: coupon Apply.
+export const btnSecondaryCompact = `${buttonBase} h-9 px-3.5 text-sm ${secondaryColours}`
 
 // Small second action inside a list row: Edit, Remove, dev tools.
 export const btnSecondarySm = `${buttonBase} h-9 px-3 text-xs ${ghostColours}`
 
+// Tiny second action in the dev tools footer.
+export const btnSecondaryXs = `${buttonBase} h-7 px-2.5 text-xs ${ghostColours}`
+
 // Small Retry/Try again next to an error.
 export const btnDanger = `${buttonBase} h-8 border border-red-300 bg-white px-3 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50`
 
-export const card = 'rounded-2xl border border-line bg-white p-4 shadow-sm sm:p-5'
+// Text-only red button for a quiet destructive action: Remove.
+export const btnLinkDanger = `${buttonBase} h-7 px-2 text-xs text-red-700 hover:bg-red-50 disabled:opacity-50`
 
 // No width here: each place adds its own (w-full, w-20…), so two widths never clash.
 export const input = `h-10 rounded-lg border border-muted/40 bg-white px-3 text-sm text-ink ${focusRing}`
+
+// Same, one step shorter: the coupon box in the cart.
+export const inputCompact = `h-9 rounded-lg border border-muted/40 bg-white px-3 text-sm text-ink ${focusRing}`

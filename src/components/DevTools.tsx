@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { api } from '../api/client'
-import { btnSecondarySm } from './ui'
+import { btnSecondaryXs } from './ui'
 
 interface Props {
   onReset: () => void // the page starts over (cart, builder, orders)
@@ -23,11 +23,11 @@ export function DevTools({ onReset }: Props) {
   }
 
   const reason = pending ? 'Working…' : undefined
-  const buttonClass = btnSecondarySm
+  const buttonClass = btnSecondaryXs
 
   return (
     <footer className="shrink-0 border-t border-line bg-white">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 py-2 text-xs sm:px-6">
+      <div className="mx-auto flex max-w-screen-2xl flex-wrap items-center gap-2 px-4 py-1.5 text-xs sm:px-6">
         <span className="font-semibold tracking-wide text-muted uppercase">Dev tools</span>
         <button
           type="button"

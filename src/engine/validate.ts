@@ -79,14 +79,15 @@ function checkGroup(group: Group, config: Config, groups: Group[], rules: Rule[]
   return violations
 }
 
-interface Limit {
+export interface Limit {
   max: number | undefined
   overriddenBy: OptionId | undefined // the selected option whose rule set this max
 }
 
 // An overrideLimit rule replaces the group's max while its option is selected.
 // If several such options are selected, the smallest max wins (the safest limit).
-function effectiveMax(group: Group, config: Config, rules: Rule[]): Limit {
+// Exported so the builder can show "3/2" with the same limit the validator uses.
+export function effectiveMax(group: Group, config: Config, rules: Rule[]): Limit {
   let best: { max: number; option: OptionId } | undefined
 
   for (const rule of rules) {

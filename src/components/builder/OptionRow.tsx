@@ -1,5 +1,6 @@
 import { formatBdt } from '../../engine/money'
 import type { MenuOption } from '../../types/menu'
+import { Stepper } from '../common/Stepper'
 
 interface Props {
   option: MenuOption
@@ -12,63 +13,43 @@ interface Props {
 function stockLabel(headroom: Props['headroom']): string {
   if (headroom === null) return '…'
   if (headroom === 'unlimited') return '∞'
-  if (headroom === 0) return 'Out of stock'
+  if (headroom === 0) return 'Sold out'
   return `+${headroom} left`
 }
-
-const stepButton =
-  'flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-white text-lg text-muted transition-colors hover:border-primary hover:bg-selected disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-line disabled:hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
 
 export function OptionRow({ option, qty, headroom, onChange }: Props) {
   const noStock = headroom === 0
   const selected = qty > 0
-  const plusReason = noStock ? `Not enough stock for another ${option.name}` : undefined
-  const minusReason = qty === 0 ? 'Nothing to remove' : undefined
+
+  let look = 'border-line bg-white hover:border-muted/40'
+  if (selected) look = 'border-primary/50 bg-selected'
+  else if (noStock) look = 'border-line bg-page opacity-70' // nothing chosen, nothing left
 
   return (
-    <li
-      className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 transition-colors ${selected ? 'border-primary bg-selected ring-1 ring-primary' : 'border-line bg-white hover:border-muted/40'}`}
-    >
-      <div className="min-w-0">
-        <p className="truncate font-medium text-ink">{option.name}</p>
-        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
-          <span className="font-medium text-muted">
-            {option.price > 0 ? `+ BDT ${formatBdt(option.price)}` : 'Free'}
-          </span>
-          <span
-            className={`rounded-full px-2 py-0.5 ${noStock ? 'bg-red-50 font-medium text-red-700' : 'bg-page text-muted'}`}
-          >
-            {stockLabel(headroom)}
-          </span>
-        </div>
+    <li className={`min-w-0 rounded-lg border px-2 py-1 transition-colors ${look}`}>
+      <div className="flex items-baseline justify-between gap-1">
+        <p className="min-w-0 text-sm leading-tight font-semibold wrap-break-word text-ink lg:text-[0.78rem]">
+          {option.name}
+        </p>
+        <span className="shrink-0 text-xs text-muted tabular-nums lg:text-[0.7rem]">
+          {option.price > 0 ? `+${formatBdt(option.price)}` : 'Free'}
+        </span>
       </div>
-      <div className="flex shrink-0 items-center gap-1.5">
-        <button
-          type="button"
-          className={stepButton}
-          aria-label={`Remove one ${option.name}`}
-          title={minusReason}
-          disabled={qty === 0}
-          onClick={() => onChange(qty - 1)}
+      <div className="mt-0.5 flex flex-wrap items-center justify-between gap-1">
+        <span
+          className={`rounded-full px-1.5 py-0.5 text-xs leading-none font-medium whitespace-nowrap lg:text-[0.65rem] ${noStock ? 'bg-red-50 text-red-700' : 'bg-page text-muted'}`}
         >
-          −
-        </button>
-        <output
-          className={`w-7 text-center tabular-nums ${selected ? 'font-bold text-primary-hover' : 'text-muted'}`}
-          aria-label={`${option.name} quantity`}
-        >
-          {qty}
-        </output>
-        <button
-          type="button"
-          className={stepButton}
-          aria-label={`Add one ${option.name}`}
-          title={plusReason}
-          disabled={noStock}
-          onClick={() => onChange(qty + 1)}
-        >
-          +
-        </button>
+          {stockLabel(headroom)}
+        </span>
+        <Stepper
+          value={qty}
+          label={option.name}
+          valueLabel={`${option.name} quantity`}
+          onChange={onChange}
+          compact
+          minusDisabledReason={qty === 0 ? 'Nothing to remove' : undefined}
+          plusDisabledReason={noStock ? `Not enough stock for another ${option.name}` : undefined}
+        />
       </div>
     </li>
   )
