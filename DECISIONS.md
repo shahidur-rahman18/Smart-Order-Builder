@@ -66,6 +66,24 @@ The server generates the order ID using `crypto.randomUUID()` and creates the ti
 
 ## ◆ D5 — "Who is our best customer?"
 <!-- Think about: What exactly does the bot reply? Which two things stop it inventing a name (no tool + system prompt)? How is it tested (TC-20)? -->
+Orders do not store any customer identity, so the bot says it plainly: the order data has no customer
+names or contact details, so it cannot tell who the best customer is. It then lists what it can answer,
+so the user is not left empty-handed.
+
+Three things stop it from inventing a name:
+
+1. **Nothing in the data or the tools.** `StoredOrder` has no customer field, and there is no tool that
+   returns customers. There is simply no source for a name.
+2. **"Not available" comes from code.** The `describeData` tool returns a `notInData` list (customer
+   names or identity, phone numbers, emails, addresses and so on), so the "we don't have that" answer
+   comes from our code, not from the model's guess.
+3. **System prompt rule.** Gemini must answer only from tool results and never invent a name or a number.
+   If no tool fits, it calls `describeData` and says the data does not contain that.
+
+**Proof:** TC-20 (Gemini mocked) checks that the answer says the order data has no customer information,
+that no customer tool is in the tool list sent to Gemini, and that the system prompt contains the
+"never invent" rule. I also tried it in the browser with a real Gemini key: the bot called `describeData`,
+explained what is missing, and did not invent a name.
 
 ## ◆ D6 — Stored order JSON shape
 <!-- Paste the real shape from src/types/order.ts. Explain: money unit, why totals are stored, how a coupon entered but not applied is recorded (status + reason). -->
