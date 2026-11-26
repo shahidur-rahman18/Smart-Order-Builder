@@ -1,4 +1,5 @@
 import { menu } from '../fixtures'
+import { getCart } from '../server/cart'
 import { isErrorBody } from '../server/http'
 import type { ErrorBody, ServerResponse } from '../types/api'
 
@@ -23,4 +24,9 @@ export function ingredientId(name: string): string {
   const found = menu.ingredients.find((i) => i.name === name)
   if (!found) throw new Error(`Unknown ingredient: ${name}`)
   return found.id
+}
+
+// The cart version a tab would be showing right now (Part G: changes must send it).
+export function cartVersion(): number {
+  return ok(getCart()).cart.version
 }

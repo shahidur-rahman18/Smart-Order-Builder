@@ -7,7 +7,7 @@ import { getMenu } from '../server/menu'
 import { pricePreview } from '../server/price'
 import { getStock } from '../server/stockView'
 import type { ErrorBody, ServerResponse } from '../types/api'
-import { parseAddItem, parseCheckout, parseCoupon, parseEditItem, parsePrice } from './parse'
+import { parseAddItem, parseCheckout, parseCoupon, parseEditItem, parsePrice, parseRemoveItem } from './parse'
 
 // MSW is only the "counter": it reads the request, calls the server function
 // (which does all the real work in src/server) and sends its answer back.
@@ -81,15 +81,16 @@ export const handlers = [
     return body ? send(editItem(params.id, body)) : badRequest()
   }),
 
-  http.delete<{ id: string }>('/api/cart/items/:id', async ({ params }) => {
+  http.delete<{ id: string }>('/api/cart/items/:id', async ({ request, params }) => {
+    const body = parseRemoveItem(await readJson(request))
     await networkDelay(OTHER_DELAY_MS)
-    return send(removeItem(params.id))
+    return body ? send(removeItem(params.id, body.itemVersion)) : badRequest()
   }),
 
   http.put('/api/cart/coupon', async ({ request }) => {
     const body = parseCoupon(await readJson(request))
     await networkDelay(OTHER_DELAY_MS)
-    return body ? send(setCoupon(body.code)) : badRequest()
+    return body ? send(setCoupon(body.code, body.cartVersion)) : badRequest()
   }),
 
   http.post('/api/checkout', async ({ request }) => {

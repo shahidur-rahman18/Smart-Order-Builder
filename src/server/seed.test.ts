@@ -7,7 +7,7 @@ import { normalizeSeedOrder, priceSeedOrder } from './seed'
 import { readState } from './state'
 import { getStock } from './stockView'
 import { configA } from '../test/builders'
-import { ok } from '../test/serverHelpers'
+import { cartVersion, ok } from '../test/serverHelpers'
 import type { SeedOrder } from '../types/seed'
 
 const seedOrders = () => ok(getOrders()).orders.filter((o) => o.source === 'seed')
@@ -44,7 +44,7 @@ describe('seed orders', () => {
     seedOrders()
     seedOrders()
     ok(addItem({ idempotencyKey: 'add-seed', config: configA(), quantity: 1 }))
-    ok(checkout({ idempotencyKey: 'pay-seed', paymentMethod: 'card' }))
+    ok(checkout({ idempotencyKey: 'pay-seed', paymentMethod: 'card', cartVersion: cartVersion() }))
 
     const { orders } = ok(getOrders())
     expect(orders).toHaveLength(seed.orders.length + 1)

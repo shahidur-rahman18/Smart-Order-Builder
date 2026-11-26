@@ -6,7 +6,7 @@ import { ordersToJson } from '../../engine/ordersJson'
 import { getStock } from '../../server/stockView'
 import { STORAGE_KEY } from '../../server/storage'
 import { configA, configB } from '../builders'
-import { errorOf, ingredientId, ok } from '../serverHelpers'
+import { cartVersion, errorOf, ingredientId, ok } from '../serverHelpers'
 import type { StoredOrder } from '../../types/order'
 
 const EGG = ingredientId('egg')
@@ -33,7 +33,7 @@ describe('SPEC §9 checkout acceptance tests', () => {
     const eggsWhileReserved = ok(getStock()).available[EGG]
     expect(eggsWhileReserved).toBeLessThan(fullEggs)
 
-    const request = { idempotencyKey: 'pay-tc16', paymentMethod: 'card' } as const
+    const request = { idempotencyKey: 'pay-tc16', paymentMethod: 'card', cartVersion: cartVersion() }
     const first = checkout(request)
     const second = checkout(request)
 
@@ -53,7 +53,7 @@ describe('SPEC §9 checkout acceptance tests', () => {
     expect(ok(getStock()).available[EGG]).toBe(eggsWhileReserved)
 
     // A second click with a NEW key finds an empty cart.
-    const third = checkout({ idempotencyKey: 'pay-tc16-again', paymentMethod: 'card' })
+    const third = checkout({ idempotencyKey: 'pay-tc16-again', paymentMethod: 'card', cartVersion: cartVersion() })
     expect(third.status).toBe(409)
     expect(errorOf(third).code).toBe('CART_EMPTY')
     expect(checkoutOrders(ok(getOrders()).orders)).toHaveLength(1)
@@ -61,7 +61,7 @@ describe('SPEC §9 checkout acceptance tests', () => {
 
   it('TC-17 refresh after checkout → orders still there; export is valid JSON in the D6 shape', () => {
     ok(addItem({ idempotencyKey: 'add-tc17', config: configA(), quantity: 2 }))
-    const { order } = ok(checkout({ idempotencyKey: 'pay-tc17', paymentMethod: 'bkash' }))
+    const { order } = ok(checkout({ idempotencyKey: 'pay-tc17', paymentMethod: 'bkash', cartVersion: cartVersion() }))
 
     // "Refresh": nothing in memory survives, only localStorage. A new request reads it again.
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -104,8 +104,8 @@ describe('checkout details', () => {
 
   it('order id and createdAt come from the server; price is locked at Pay with server time', () => {
     ok(addItem({ idempotencyKey: 'add-1', config: configB(), quantity: 1 }))
-    setCoupon('MORNING15')
-    const { order } = ok(checkout({ idempotencyKey: 'pay-1', paymentMethod: 'cash' }))
+    setCoupon('MORNING15', cartVersion())
+    const { order } = ok(checkout({ idempotencyKey: 'pay-1', paymentMethod: 'cash', cartVersion: cartVersion() }))
 
     expect(order.source).toBe('checkout')
     expect(order.createdAt).toBe(new Date(browserAt105829 + SKEW_MS).toISOString())
@@ -123,8 +123,8 @@ describe('checkout details', () => {
   it('a coupon entered but not applied is recorded with status and reason', () => {
     vi.setSystemTime(browserAt105829 + 1000) // server 11:00:00
     ok(addItem({ idempotencyKey: 'add-2', config: configA(), quantity: 1 }))
-    setCoupon('MORNING15')
-    const { order } = ok(checkout({ idempotencyKey: 'pay-2', paymentMethod: 'card' }))
+    setCoupon('MORNING15', cartVersion())
+    const { order } = ok(checkout({ idempotencyKey: 'pay-2', paymentMethod: 'card', cartVersion: cartVersion() }))
 
     expect(order.coupon.entered).toBe('MORNING15')
     expect(order.coupon.applied).toBe(false)
@@ -137,7 +137,7 @@ describe('checkout details', () => {
     vi.setSystemTime(browserAt105829 + TTL_MS)
     const before = localStorage.getItem(STORAGE_KEY)
 
-    const result = checkout({ idempotencyKey: 'pay-3', paymentMethod: 'card' })
+    const result = checkout({ idempotencyKey: 'pay-3', paymentMethod: 'card', cartVersion: cartVersion() })
     expect(result.status).toBe(409)
     expect(errorOf(result).code).toBe('CART_EMPTY')
     expect(localStorage.getItem(STORAGE_KEY)).toBe(before)
@@ -147,7 +147,7 @@ describe('checkout details', () => {
     ok(addItem({ idempotencyKey: 'add-4', config: configA(), quantity: 1 }))
     const before = localStorage.getItem(STORAGE_KEY)
 
-    const result = checkout({ idempotencyKey: 'pay-4', paymentMethod: 'cheque' })
+    const result = checkout({ idempotencyKey: 'pay-4', paymentMethod: 'cheque', cartVersion: cartVersion() })
     expect(result.status).toBe(422)
     expect(errorOf(result).code).toBe('INVALID_PAYMENT_METHOD')
     expect(localStorage.getItem(STORAGE_KEY)).toBe(before)

@@ -5,6 +5,7 @@ import { PAYMENT_METHODS, isPaymentMethod } from '../types/order'
 import { serverNow } from './clock'
 import { ServerError, respond } from './http'
 import { recall, remember } from './idempotency'
+import { checkVersion } from './cart'
 import { buildStoredOrder } from './orders'
 import { readState, withState } from './state'
 import { activeItems } from './stockView'
@@ -19,6 +20,9 @@ export function checkout(request: CheckoutRequest): ServerResponse<OrderBody | E
       // Double click on Pay: same key → the same saved order, no second one.
       const saved = recall(state, 'checkout', request.idempotencyKey)
       if (saved) return { status: saved.status, body: { ...saved.body, serverTime: now } }
+
+      // Pay only for the cart this tab is showing (another tab may have added or removed items).
+      checkVersion(state.cart.version, request.cartVersion)
 
       if (!isPaymentMethod(request.paymentMethod)) {
         throw new ServerError(422, {

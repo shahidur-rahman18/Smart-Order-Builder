@@ -8,7 +8,7 @@ import { buildStoredOrder } from './orders'
 import { priceCart } from '../engine/pricing'
 import { formatShortages } from '../engine/stock'
 import { configA, configB, configByNames, configC } from '../test/builders'
-import { errorOf, ingredientId, ok } from '../test/serverHelpers'
+import { cartVersion, errorOf, ingredientId, ok } from '../test/serverHelpers'
 import type { CartItemView } from '../types/cart'
 import type { Config } from '../types/menu'
 
@@ -155,18 +155,18 @@ describe('cart server details', () => {
     const b = add(configB())
     expect(ok(getStock()).available[EGG]).toBeLessThan(fullEggs)
 
-    expect(removeItem(b.id).status).toBe(200)
+    expect(removeItem(b.id, b.version).status).toBe(200)
     expect(ok(getStock()).available[EGG]).toBe(fullEggs)
-    expect(removeItem(b.id).status).toBe(404)
+    expect(removeItem(b.id, b.version).status).toBe(404)
   })
 
   it('coupon is stored on the cart and used by the totals; blank clears it', () => {
     add(configA())
-    const withCoupon = ok(setCoupon('  some-code  '))
+    const withCoupon = ok(setCoupon('  some-code  ', cartVersion()))
     expect(withCoupon.cart.couponCode).toBe('some-code')
     expect(withCoupon.totals.coupon.entered).toBe('some-code')
 
-    expect(ok(setCoupon('   ')).cart.couponCode).toBeNull()
+    expect(ok(setCoupon('   ', cartVersion())).cart.couponCode).toBeNull()
   })
 
   it('sold stock counts checkout orders only; seed orders are history', () => {

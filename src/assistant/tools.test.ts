@@ -3,7 +3,7 @@ import { menu } from '../fixtures'
 import { addItem } from '../server/cart'
 import { checkout } from '../server/checkout'
 import { configA } from '../test/builders'
-import { ok } from '../test/serverHelpers'
+import { cartVersion, ok } from '../test/serverHelpers'
 import { TOOL_NAMES, runTool, toolDeclarations } from './tools'
 
 describe('tool declarations (what Gemini is allowed to call)', () => {
@@ -33,7 +33,7 @@ describe('runTool', () => {
     expect(before).toEqual({ count: 6 })
 
     ok(addItem({ idempotencyKey: 'add-tool', config: configA(), quantity: 1 }))
-    ok(checkout({ idempotencyKey: 'pay-tool', paymentMethod: 'cash' }))
+    ok(checkout({ idempotencyKey: 'pay-tool', paymentMethod: 'cash', cartVersion: cartVersion() }))
 
     const after = await runTool('countOrders', {})
     expect(after).toEqual({ count: 7 })

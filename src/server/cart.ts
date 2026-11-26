@@ -72,12 +72,7 @@ export function editItem(itemId: string, request: EditItemRequest): ServerRespon
           message: 'This item expired and its stock was released. Add it again as a new item.',
         })
       }
-      if (item.version !== request.itemVersion) {
-        throw new ServerError(409, {
-          code: 'VERSION_CONFLICT',
-          message: 'This item was changed somewhere else. Reload the cart and try again.',
-        })
-      }
+      checkVersion(item.version, request.itemVersion)
 
       const { config, quantity } = request
       checkQuantity(quantity)
@@ -101,11 +96,13 @@ export function editItem(itemId: string, request: EditItemRequest): ServerRespon
 }
 
 // DELETE /api/cart/items/:id — works for expired items too.
-export function removeItem(itemId: string): ServerResponse<RemoveItemBody | ErrorBody> {
+// itemVersion: the version the tab saw, so it never removes a change it has not seen.
+export function removeItem(itemId: string, itemVersion: number): ServerResponse<RemoveItemBody | ErrorBody> {
   return respond(() =>
     withState((state) => {
       const now = serverNow()
       const item = findItem(state, itemId)
+      checkVersion(item.version, itemVersion)
       state.cart.items = state.cart.items.filter((other) => other.id !== item.id)
       state.cart.version += 1
       return { status: 200, body: { cart: cartView(state, now), serverTime: now } }
@@ -114,14 +111,18 @@ export function removeItem(itemId: string): ServerResponse<RemoveItemBody | Erro
 }
 
 // PUT /api/cart/coupon — store what was typed; priceCart decides if it applies.
-export function setCoupon(code: string | null): ServerResponse<CartBody> {
-  return withState((state) => {
-    const now = serverNow()
-    const trimmed = code?.trim() ?? ''
-    state.cart.couponCode = trimmed === '' ? null : trimmed
-    state.cart.version += 1
-    return { status: 200, body: cartBody(state, now) }
-  })
+// cartVersion: the cart the tab saw; an old one means another tab changed it first.
+export function setCoupon(code: string | null, cartVersion: number): ServerResponse<CartBody | ErrorBody> {
+  return respond(() =>
+    withState((state) => {
+      const now = serverNow()
+      checkVersion(state.cart.version, cartVersion)
+      const trimmed = code?.trim() ?? ''
+      state.cart.couponCode = trimmed === '' ? null : trimmed
+      state.cart.version += 1
+      return { status: 200, body: cartBody(state, now) }
+    }),
+  )
 }
 
 // GET /api/cart — totals are re-priced at the current server time on every call.
@@ -170,6 +171,17 @@ function checkStock(need: Usage, available: Usage): void {
       message: formatShortages(shortages),
       shortages,
       available,
+    })
+  }
+}
+
+// Part G: the tab must have seen the latest version, or it would overwrite
+// a change from another tab without knowing. Also used by checkout.ts.
+export function checkVersion(current: number, seenByTab: number): void {
+  if (current !== seenByTab) {
+    throw new ServerError(409, {
+      code: 'VERSION_CONFLICT',
+      message: 'The cart was changed in another tab.',
     })
   }
 }

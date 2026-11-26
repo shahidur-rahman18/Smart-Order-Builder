@@ -34,6 +34,16 @@ export interface EditItemRequest {
 export interface CheckoutRequest {
   idempotencyKey: string
   paymentMethod: string // checked against PAYMENT_METHODS on the server
+  cartVersion: number // the cart version this tab is showing (Part G)
+}
+
+export interface CouponRequest {
+  code: string | null
+  cartVersion: number
+}
+
+export interface RemoveItemRequest {
+  itemVersion: number
 }
 
 // ---------- success bodies (every one carries serverTime) ----------

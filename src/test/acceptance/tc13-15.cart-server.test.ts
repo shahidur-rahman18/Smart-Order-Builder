@@ -87,7 +87,7 @@ describe('SPEC §9 cart server acceptance tests', () => {
       expect(edit.status).toBe(410)
       expect(errorOf(edit).code).toBe('EXPIRED')
 
-      expect(removeItem(item.id).status).toBe(200)
+      expect(removeItem(item.id, item.version).status).toBe(200)
       expect(ok(getCart()).cart.items).toHaveLength(0)
     })
   })

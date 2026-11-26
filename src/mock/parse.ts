@@ -1,4 +1,11 @@
-import type { AddItemRequest, CheckoutRequest, EditItemRequest, PriceRequest } from '../types/api'
+import type {
+  AddItemRequest,
+  CheckoutRequest,
+  CouponRequest,
+  EditItemRequest,
+  PriceRequest,
+  RemoveItemRequest,
+} from '../types/api'
 import type { Config } from '../types/menu'
 
 // The request body arrives as unknown JSON. These checks only make sure the
@@ -36,17 +43,23 @@ export function parseEditItem(body: unknown): EditItemRequest | null {
   return { ...base, itemVersion: body.itemVersion }
 }
 
-// { code: string | null }
-export function parseCoupon(body: unknown): { code: string | null } | null {
+export function parseCoupon(body: unknown): CouponRequest | null {
   if (!isObject(body)) return null
-  const { code } = body
-  if (code !== null && typeof code !== 'string') return null
-  return { code }
+  const { code, cartVersion } = body
+  if ((code !== null && typeof code !== 'string') || typeof cartVersion !== 'number') return null
+  return { code, cartVersion }
+}
+
+export function parseRemoveItem(body: unknown): RemoveItemRequest | null {
+  if (!isObject(body) || typeof body.itemVersion !== 'number') return null
+  return { itemVersion: body.itemVersion }
 }
 
 export function parseCheckout(body: unknown): CheckoutRequest | null {
   if (!isObject(body)) return null
-  const { idempotencyKey, paymentMethod } = body
-  if (typeof idempotencyKey !== 'string' || typeof paymentMethod !== 'string') return null
-  return { idempotencyKey, paymentMethod }
+  const { idempotencyKey, paymentMethod, cartVersion } = body
+  if (typeof idempotencyKey !== 'string' || typeof paymentMethod !== 'string' || typeof cartVersion !== 'number') {
+    return null
+  }
+  return { idempotencyKey, paymentMethod, cartVersion }
 }
