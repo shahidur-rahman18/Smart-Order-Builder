@@ -23,6 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
+# Local planning notes (kept on this PC only)
+docs/
+CLAUDE.md
+
 # Secrets (never commit)
 .env.local
 .env*.local
