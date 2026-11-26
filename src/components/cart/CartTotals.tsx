@@ -1,78 +1,87 @@
+import type { ReactNode } from 'react'
 import { formatBdt } from '../../engine/money'
-import type { Menu } from '../../types/menu'
-import type { CartBreakdown, DiscountCandidate } from '../../types/pricing'
+import type { Menu, Poisha } from '../../types/menu'
+import type { CartBreakdown } from '../../types/pricing'
+import { bdtShort, discountLabel, notUsedNote } from './discountText'
 
 interface Props {
   menu: Menu
   totals: CartBreakdown
 }
 
-// A readable name for a cart discount, from its promotion data (no ids in code).
-function discountName(candidate: DiscountCandidate, menu: Menu): string {
-  const promo = menu.promotions.find((p) => p.id === candidate.id)
-  if (promo?.type === 'couponPercent') return `Coupon ${promo.code}`
-  if (promo?.type === 'cartFixed') return 'Cart discount'
-  return candidate.id
-}
-
-function bdt(poisha: number): string {
-  return `BDT ${formatBdt(poisha)}`
-}
-
-// Full breakdown (SPEC Part C): subtotal, every cart discount with why it
-// does or does not apply, VAT, and the payable amount rounded to whole BDT.
+// Full breakdown (SPEC Part C): subtotal, every cart discount (the applied one in green,
+// the others struck through with why), VAT, and the payable amount rounded to whole BDT.
 export function CartTotals({ menu, totals }: Props) {
   const applied = totals.appliedDiscount
   const rounding = totals.payable - totals.payableExact
 
   return (
-    <section aria-label="Totals" className="space-y-2 rounded-xl bg-page p-4 text-sm text-muted">
-      <div className="flex justify-between">
-        <span>Subtotal</span>
-        <span aria-label="Subtotal">{bdt(totals.subtotal)}</span>
-      </div>
+    <section aria-label="Totals" className="space-y-1.5 rounded-xl bg-page px-3 py-2.5 text-xs text-muted">
+      <Line label="Subtotal">
+        <Amount label="Subtotal" poisha={totals.subtotal} />
+      </Line>
 
-      <ul className="space-y-1">
+      <ul className="space-y-1.5">
         {totals.candidates.map((candidate) => {
           const isApplied = applied?.id === candidate.id
+          const name = discountLabel(candidate, menu)
           return (
-            <li key={candidate.id} className={isApplied ? 'text-emerald-700' : 'text-muted'}>
-              <div className="flex justify-between gap-2">
-                <span className={isApplied ? 'font-medium' : undefined}>
-                  {discountName(candidate, menu)} {isApplied ? '(applied)' : '(not applied)'}
+            <li key={candidate.id} className="flex justify-between gap-2">
+              {isApplied ? (
+                <span className="font-semibold text-emerald-700" title={candidate.reason}>
+                  {name}
                 </span>
-                {isApplied && <span className="shrink-0 font-medium tabular-nums">− {bdt(candidate.amount)}</span>}
-              </div>
-              <p className="text-xs">{candidate.reason}</p>
+              ) : (
+                <span className="leading-snug">
+                  {name} · {notUsedNote(candidate, applied?.amount ?? null)}
+                </span>
+              )}
+              {candidate.amount > 0 && (
+                <span
+                  className={`shrink-0 tabular-nums ${isApplied ? 'font-semibold text-emerald-700' : 'line-through'}`}
+                >
+                  −{formatBdt(candidate.amount)}
+                </span>
+              )}
             </li>
           )
         })}
       </ul>
-      {/* The one case the list above cannot explain: the coupon is valid, but only the best discount applies. */}
-      {totals.coupon.status === 'lost_to_better_discount' && (
-        <p className="text-xs text-muted">{totals.coupon.reason}</p>
-      )}
 
-      <div className="flex justify-between">
-        <span>After discount</span>
-        <span>{bdt(totals.discountedSubtotal)}</span>
-      </div>
-      <div className="flex justify-between">
-        <span>VAT {menu.shop.vatPercent}%</span>
-        <span aria-label="VAT">{bdt(totals.vat)}</span>
-      </div>
+      <Line label={`VAT ${menu.shop.vatPercent}%`}>
+        <Amount label="VAT" poisha={totals.vat} />
+      </Line>
       {rounding !== 0 && (
-        <div className="flex justify-between text-muted">
-          <span>Rounding to whole BDT</span>
-          <span>
-            {rounding > 0 ? '+' : '−'} {bdt(Math.abs(rounding))}
-          </span>
-        </div>
+        <Line label="Rounding to whole BDT">
+          {rounding > 0 ? '+' : '−'}
+          {formatBdt(Math.abs(rounding))}
+        </Line>
       )}
-      <div className="flex items-baseline justify-between border-t border-dashed border-line pt-2 text-lg font-bold text-ink">
-        <span>Payable</span>
-        <span aria-label="Payable">{bdt(totals.payable)}</span>
+      <div className="flex items-baseline justify-between border-t border-line pt-2 text-ink">
+        <span className="text-sm font-semibold">Payable</span>
+        <span aria-label="Payable" className="text-lg font-extrabold tracking-tight tabular-nums">
+          BDT {bdtShort(totals.payable)}
+        </span>
       </div>
     </section>
+  )
+}
+
+// The amount alone on screen; "BDT" is read out only by screen readers (and checked by tests).
+function Amount({ label, poisha }: { label: string; poisha: Poisha }) {
+  return (
+    <span aria-label={label}>
+      <span className="sr-only">BDT </span>
+      {formatBdt(poisha)}
+    </span>
+  )
+}
+
+function Line({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex justify-between gap-2">
+      <span>{label}</span>
+      <span className="tabular-nums">{children}</span>
+    </div>
   )
 }

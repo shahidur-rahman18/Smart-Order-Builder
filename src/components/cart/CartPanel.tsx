@@ -8,8 +8,10 @@ import { PAYMENT_METHODS, type PaymentMethod, type StoredOrder } from '../../typ
 import { CartItemRow } from './CartItemRow'
 import { CartTotals } from './CartTotals'
 import { CouponInput } from './CouponInput'
+import { bdtShort } from './discountText'
 import { PaymentSelect } from './PaymentSelect'
-import { btnDanger, btnPrimary, card } from '../ui'
+import { Card } from '../common/Card'
+import { btnDanger, btnPrimaryLg } from '../ui'
 
 interface Props {
   menu: Menu
@@ -42,96 +44,106 @@ export function CartPanel({ menu, cart, editingId, onEdit, onPaid }: Props) {
   }
 
   return (
-    <section aria-labelledby="cart-heading" className={`${card} space-y-4`}>
-      <div className="flex items-center justify-between gap-2">
-        <h2 id="cart-heading" className="text-lg font-bold text-ink">
-          Cart
-        </h2>
-        {items.length > 0 && (
-          <span className="rounded-full bg-selected px-2.5 py-0.5 text-xs font-semibold text-primary-hover">
-            {items.length} {items.length === 1 ? 'item' : 'items'}
+    <Card
+      as="section"
+      ariaLabelledBy="cart-heading"
+      headingLevel={2}
+      headingId="cart-heading"
+      title="Cart"
+      aside={
+        items.length > 0 && (
+          <span className="pt-0.5 text-xs text-muted">
+            {items.length} {items.length === 1 ? 'item' : 'items'} · stock held for you
           </span>
+        )
+      }
+      className="flex flex-col lg:h-full"
+    >
+      {/* Only this middle part scrolls on a short screen; Pay always stays in view right under it. */}
+      <div className="-mx-1 flex flex-col gap-2.5 px-1 lg:min-h-0 lg:overflow-y-auto lg:[scrollbar-width:thin]">
+        {cart.error && (
+          <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
+            {cart.error}
+          </p>
         )}
+        {cart.cart === null && !cart.error && <p className="text-sm text-muted">Loading cart…</p>}
+        {cart.cart !== null && items.length === 0 && (
+          <p className="rounded-xl border border-dashed border-line p-6 text-center text-sm text-muted">
+            Your cart is empty.
+          </p>
+        )}
+
+        {items.length > 0 && (
+          <ul className="space-y-2">
+            {items.map((item, index) => (
+              <CartItemRow
+                key={item.id}
+                item={item}
+                position={index + 1}
+                menu={menu}
+                removing={cart.removingId === item.id}
+                editing={editingId === item.id}
+                onEdit={() => onEdit(item)}
+                onRemove={() => cart.remove(item.id)}
+                onExpired={cart.refresh}
+              />
+            ))}
+          </ul>
+        )}
+
+        {cart.cart !== null && (
+          // key: when the saved code changes (here, another tab, or after Pay) the box shows it.
+          <CouponInput
+            key={cart.cart.couponCode ?? ''}
+            menu={menu}
+            savedCode={cart.cart.couponCode}
+            appliedId={totals?.coupon.applied ? (totals.appliedDiscount?.id ?? null) : null}
+            pending={cart.couponPending}
+            onApply={cart.setCoupon}
+          />
+        )}
+
+        {totals && totals.lines.length > 0 && <CartTotals menu={menu} totals={totals} />}
       </div>
 
-      {cart.error && (
-        <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
-          {cart.error}
-        </p>
-      )}
-      {cart.cart === null && !cart.error && <p className="text-sm text-muted">Loading cart…</p>}
-      {cart.cart !== null && items.length === 0 && (
-        <p className="rounded-xl border border-dashed border-line p-6 text-center text-sm text-muted">
-          Your cart is empty.
-        </p>
-      )}
-
-      {items.length > 0 && (
-        <ul className="space-y-2">
-          {items.map((item, index) => (
-            <CartItemRow
-              key={item.id}
-              item={item}
-              position={index + 1}
-              menu={menu}
-              removing={cart.removingId === item.id}
-              editing={editingId === item.id}
-              onEdit={() => onEdit(item)}
-              onRemove={() => cart.remove(item.id)}
-              onExpired={cart.refresh}
-            />
-          ))}
-        </ul>
-      )}
-
-      {cart.cart !== null && (
-        // key: when the saved code changes (here, another tab, or after Pay) the box shows it.
-        <CouponInput
-          key={cart.cart.couponCode ?? ''}
-          menu={menu}
-          savedCode={cart.cart.couponCode}
-          pending={cart.couponPending}
-          onApply={cart.setCoupon}
-        />
-      )}
-
-      {totals && totals.lines.length > 0 && <CartTotals menu={menu} totals={totals} />}
-
-      <div className="space-y-2">
+      <div className="shrink-0 space-y-2 pt-2.5">
         <PaymentSelect value={paymentMethod} onChange={setPaymentMethod} />
         <button
           type="button"
-          className={`${btnPrimary} w-full`}
+          className={`${btnPrimaryLg} w-full`}
           disabled={payReason !== null}
           title={payReason ?? undefined}
           onClick={pay}
         >
-          {totals && totals.lines.length > 0 ? `Pay BDT ${formatBdt(totals.payable)}` : 'Pay'}
+          {totals && totals.lines.length > 0 ? `Pay BDT ${bdtShort(totals.payable)}` : 'Pay'}
         </button>
         {payReason && <p className="text-center text-xs text-muted">{payReason}</p>}
-      </div>
 
-      {checkout.status === 'paid' && checkout.order && (
-        <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-medium break-all text-emerald-700">
-          Order placed: {checkout.order.id} · BDT {formatBdt(checkout.order.totals.payable)}
-        </p>
-      )}
-      {checkout.failure && (
-        <div role="alert" className="flex flex-wrap items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-700">
-          <span>{checkout.failure.message}</span>
-          {checkout.failure.canRetry && (
-            <button
-              type="button"
-              className={btnDanger}
-              disabled={payReason !== null}
-              title={payReason ?? undefined}
-              onClick={pay}
-            >
-              Retry
-            </button>
-          )}
-        </div>
-      )}
-    </section>
+        {checkout.status === 'paid' && checkout.order && (
+          <p
+            role="status"
+            className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-medium break-all text-emerald-700"
+          >
+            Order placed: {checkout.order.id} · BDT {formatBdt(checkout.order.totals.payable)}
+          </p>
+        )}
+        {checkout.failure && (
+          <div role="alert" className="flex flex-wrap items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-700">
+            <span>{checkout.failure.message}</span>
+            {checkout.failure.canRetry && (
+              <button
+                type="button"
+                className={btnDanger}
+                disabled={payReason !== null}
+                title={payReason ?? undefined}
+                onClick={pay}
+              >
+                Retry
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </Card>
   )
 }

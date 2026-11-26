@@ -18,7 +18,7 @@ function CartHarness() {
 function minutesText(ms: number): string {
   const totalSeconds = Math.ceil(ms / 1000)
   const seconds = String(totalSeconds % 60).padStart(2, '0')
-  return `${Math.floor(totalSeconds / 60)}:${seconds} left`
+  return `${Math.floor(totalSeconds / 60)}:${seconds}`
 }
 
 describe('Cart UI', () => {

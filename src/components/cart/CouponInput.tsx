@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import type { Menu } from '../../types/menu'
-import { btnSecondary, input } from '../ui'
+import { btnSecondaryCompact, inputCompact } from '../ui'
 
 interface Props {
   menu: Menu
   savedCode: string | null // what the server has for this cart
+  appliedId: string | null // promotion id of the coupon the server applied, or null
   pending: boolean
   onApply: (code: string | null) => void
 }
@@ -19,9 +20,17 @@ function timeLimitNotes(menu: Menu): string[] {
   )
 }
 
-export function CouponInput({ menu, savedCode, pending, onApply }: Props) {
+// Short green note under an applied coupon, e.g. "Applied · valid before 11:00, checked at Pay".
+function appliedNote(menu: Menu, appliedId: string | null): string | null {
+  const promo = menu.promotions.find((p) => p.id === appliedId)
+  if (promo?.type !== 'couponPercent') return null
+  return `Applied · valid before ${promo.validBefore}, checked at Pay`
+}
+
+export function CouponInput({ menu, savedCode, appliedId, pending, onApply }: Props) {
   const [text, setText] = useState(savedCode ?? '')
   const unchanged = text.trim() === (savedCode ?? '')
+  const applied = appliedNote(menu, appliedId)
 
   let applyReason: string | null = null
   if (pending) applyReason = 'Saving…'
@@ -30,50 +39,43 @@ export function CouponInput({ menu, savedCode, pending, onApply }: Props) {
   return (
     <div className="space-y-1">
       <form
-        className="flex flex-wrap items-end gap-2"
         onSubmit={(event) => {
           event.preventDefault()
+          // An empty box + Apply removes the saved coupon.
           if (applyReason === null) onApply(text.trim() === '' ? null : text)
         }}
       >
-        <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-          <span className="font-medium text-muted">Coupon code</span>
+        <label htmlFor="coupon-code" className="mb-1 block text-[0.8rem] font-semibold text-ink">
+          Coupon code
+        </label>
+        <div className="flex gap-2">
           <input
-            className={`${input} w-full uppercase placeholder:normal-case`}
+            id="coupon-code"
+            className={`${inputCompact} min-w-0 flex-1 uppercase placeholder:normal-case`}
             placeholder="Enter code"
             value={text}
             onChange={(event) => setText(event.target.value)}
             autoComplete="off"
           />
-        </label>
-        <button
-          type="submit"
-          className={btnSecondary}
-          disabled={applyReason !== null}
-          title={applyReason ?? undefined}
-        >
-          Apply
-        </button>
-        {savedCode && (
           <button
-            type="button"
-            className={btnSecondary}
-            disabled={pending}
-            title={pending ? 'Saving…' : undefined}
-            onClick={() => {
-              setText('')
-              onApply(null)
-            }}
+            type="submit"
+            className={btnSecondaryCompact}
+            disabled={applyReason !== null}
+            title={applyReason ?? (text.trim() === '' ? 'Remove the coupon' : undefined)}
           >
-            Clear
+            Apply
           </button>
-        )}
+        </div>
       </form>
-      {timeLimitNotes(menu).map((note) => (
-        <p key={note} className="text-xs text-muted">
-          {note}
-        </p>
-      ))}
+      {applied ? (
+        <p className="text-[0.7rem] font-medium leading-snug text-emerald-700">{applied}</p>
+      ) : (
+        timeLimitNotes(menu).map((note) => (
+          <p key={note} className="text-[0.7rem] leading-snug text-muted">
+            {note}
+          </p>
+        ))
+      )}
     </div>
   )
 }

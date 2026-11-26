@@ -4,6 +4,7 @@ import { http } from 'msw'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { api } from '../../api/client'
 import App from '../../App'
+import { bdtShort, discountLabel } from '../../components/cart/discountText'
 import { formatBdt } from '../../engine/money'
 import { priceCart } from '../../engine/pricing'
 import { menu } from '../../fixtures'
@@ -48,7 +49,7 @@ describe('Checkout UI', { timeout: 15_000 }, () => {
       expect(within(totals()).getByLabelText('Subtotal')).toHaveTextContent(`BDT ${formatBdt(without.subtotal)}`),
     )
     expect(within(totals()).getByLabelText('VAT')).toHaveTextContent(`BDT ${formatBdt(without.vat)}`)
-    expect(within(totals()).getByLabelText('Payable')).toHaveTextContent(`BDT ${formatBdt(without.payable)}`)
+    expect(within(totals()).getByLabelText('Payable')).toHaveTextContent(`BDT ${bdtShort(without.payable)}`)
 
     await user.type(screen.getByLabelText('Coupon code'), couponCode().toLowerCase())
     await user.click(screen.getByRole('button', { name: 'Apply' }))
@@ -56,12 +57,14 @@ describe('Checkout UI', { timeout: 15_000 }, () => {
     const withCoupon = priceCart(lines, menu, menu.promotions, now, couponCode().toLowerCase())
     expect(withCoupon.coupon.applied).toBe(true)
     await waitFor(() =>
-      expect(within(totals()).getByLabelText('Payable')).toHaveTextContent(`BDT ${formatBdt(withCoupon.payable)}`),
+      expect(within(totals()).getByLabelText('Payable')).toHaveTextContent(`BDT ${bdtShort(withCoupon.payable)}`),
     )
-    // The coupon line says it is applied, with the reason from the engine.
+    // The applied coupon line is named from the promotion data, with the engine's reason on hover.
     const couponLine = withCoupon.candidates.find((c) => c.id === withCoupon.appliedDiscount?.id)
-    expect(within(totals()).getByText(`Coupon ${couponCode()} (applied)`)).toBeInTheDocument()
-    expect(within(totals()).getByText(couponLine?.reason ?? 'missing')).toBeInTheDocument()
+    if (!couponLine) throw new Error('no applied discount')
+    const label = within(totals()).getByText(discountLabel(couponLine, menu))
+    expect(label).toHaveAttribute('title', couponLine.reason)
+    expect(screen.getByText(/^Applied · valid before/)).toBeInTheDocument()
   })
 
   it('TC-16 (UI): double click on Pay → one POST, one order, cart empties', async () => {

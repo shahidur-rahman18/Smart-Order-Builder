@@ -1,17 +1,24 @@
 import { formatCountdown } from '../../hooks/useCountdown'
+import { Badge } from '../common/Badge'
 
 interface Props {
   msLeft: number
 }
 
+// Under this, the item is "about to expire" (amber card, amber badge).
+export const SOON_MS = 60_000
+
 export function Countdown({ msLeft }: Props) {
-  // The last minute is shown in red, so the user notices before it runs out.
-  const urgent = msLeft < 60_000
+  const soon = msLeft < SOON_MS
   return (
-    <span
-      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold tabular-nums ${urgent ? 'bg-red-50 text-red-700' : 'bg-page text-muted'}`}
-    >
-      {formatCountdown(msLeft)} left
+    <span title="Time left before the held stock is released">
+      <Badge tone={soon ? 'warn' : 'ok'} outline>
+        <span aria-hidden="true" className="mr-1">
+          ⏱
+        </span>
+        <span>{formatCountdown(msLeft)}</span>
+        {soon && <span className="ml-1">· expires soon</span>}
+      </Badge>
     </span>
   )
 }
