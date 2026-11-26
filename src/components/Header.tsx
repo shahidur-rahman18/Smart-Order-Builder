@@ -1,6 +1,6 @@
 import { ServerClock } from './ServerClock'
 
-export type Tab = 'build' | 'orders' | 'assistant'
+export type Tab = 'build' | 'orders'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'build', label: 'Build' },
@@ -14,9 +14,6 @@ interface Props {
   timeZone?: string
   cartCount?: number
 }
-
-const iconButton =
-  'relative inline-flex h-9 min-w-9 sm:h-10 sm:min-w-10 items-center justify-center gap-2 rounded-xl bg-ink px-3 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
 
 export function Header({ tab, onTab, timeZone, cartCount = 0 }: Props) {
   return (
@@ -63,33 +60,20 @@ export function Header({ tab, onTab, timeZone, cartCount = 0 }: Props) {
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
           {timeZone && <ServerClock timeZone={timeZone} />}
-          {/* Opens the Assistant page (Part F). Disabled only while the menu is loading. */}
-          <button
-            type="button"
-            aria-label="Sales assistant"
-            aria-pressed={tab === 'assistant'}
-            className={`${iconButton} disabled:opacity-50 ${tab === 'assistant' ? 'ring-2 ring-primary ring-offset-2' : ''}`}
-            disabled={!onTab}
-            title={onTab ? undefined : 'Loading menu…'}
-            onClick={() => onTab?.('assistant')}
-          >
-            <span aria-hidden="true">✦</span>
-            <span className="hidden sm:inline">Sales assistant</span>
-          </button>
           {/* Phones and tablets: the cart sits below the menu, so jump to it. */}
           {tab === 'build' && (
-          <a
-            href="#cart"
-            aria-label={`Cart, ${cartCount} items`}
-            className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border sm:h-10 sm:w-10 border-line bg-white text-ink lg:hidden"
-          >
-            <span aria-hidden="true">🛒</span>
-            {cartCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-bold text-white">
-                {cartCount}
-              </span>
-            )}
-          </a>
+            <a
+              href="#cart"
+              aria-label={`Cart, ${cartCount} items`}
+              className="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border sm:h-10 sm:w-10 border-line bg-white text-ink lg:hidden"
+            >
+              <span aria-hidden="true">🛒</span>
+              {cartCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-xs font-bold text-white">
+                  {cartCount}
+                </span>
+              )}
+            </a>
           )}
         </div>
       </div>

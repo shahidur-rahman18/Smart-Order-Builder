@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChatPanel } from './components/assistant/ChatPanel'
+import { FloatingAssistant } from './components/assistant/FloatingAssistant'
 import { Builder } from './components/builder/Builder'
 import { CartPanel } from './components/cart/CartPanel'
 import { DevTools } from './components/DevTools'
@@ -56,11 +56,6 @@ function Shop({ menu }: { menu: Menu }) {
           </div>
         </div>
 
-        {/* Hidden, not removed: the conversation survives a look at another tab. */}
-        <div hidden={tab !== 'assistant'} className="mx-auto w-full max-w-4xl px-4 py-4 sm:px-6 lg:h-full">
-          <ChatPanel timeZone={menu.shop.timeZone} />
-        </div>
-
         {/* Mounted only while open: it asks for fresh orders each time. */}
         {tab === 'orders' && (
           <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:h-full lg:overflow-y-auto">
@@ -68,6 +63,9 @@ function Shop({ menu }: { menu: Menu }) {
           </div>
         )}
       </main>
+
+      {/* Floats over every page, so the chat is one click away from anywhere. */}
+      <FloatingAssistant timeZone={menu.shop.timeZone} />
     </>
   )
 }

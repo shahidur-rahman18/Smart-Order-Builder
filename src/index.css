@@ -14,4 +14,27 @@
   --color-muted: #57534e; /* secondary text */
   --color-page: #f6f4f1; /* page background, soft panels */
   --color-line: #e7e5e4; /* borders */
+
+  /* Floating chat button: a soft, slow bounce (class: animate-soft-bounce). */
+  --animate-soft-bounce: soft-bounce 2.4s ease-in-out infinite;
+
+  @keyframes soft-bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    /* Up a little, then back down; the rest of the cycle is a short pause. */
+    25% {
+      transform: translateY(-8px);
+    }
+    45% {
+      transform: translateY(0);
+    }
+    55% {
+      transform: translateY(-3px);
+    }
+    65% {
+      transform: translateY(0);
+    }
+  }
 }
