@@ -11,7 +11,7 @@
     "test": "node scripts/vitest.mjs run",
     "test:watch": "node scripts/vitest.mjs",
     "typecheck": "tsc -b",
-    "answers": "node scripts/vitest.mjs run src/answers",
+    "answers": "node scripts/vitest.mjs run src/answers --silent=false",
     "check:hardcode": "node scripts/check-hardcode.mjs"
   },
   "dependencies": {

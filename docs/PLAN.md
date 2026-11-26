@@ -121,7 +121,7 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
   - [x] Add disabled while violations exist (TC-01 via UI)
 **Commit:** `feat(ui): data-driven builder with debounced price preview (TC-12..14)`
 
-## Step 10 — Cart UI, edit, checkout, orders page (≈2 h) — TC-15…17 (UI)
+## ✅ Step 10 — Cart UI, edit, checkout, orders page (≈2 h) — TC-15…17 (UI)
 - [x] `useCart`, `useCountdown` (server time), `useOrders`
 - [x] Cart panel: countdown, expired read-only, Remove, Edit → builder edit mode (net headroom), D1/D3 behaviour exactly as written in DECISIONS
   - [x] D3: on expiry (serverNow countdown hits 0, or PUT → 410 `EXPIRED`) the edited config stays in the builder, Save disabled with an expiry message, cart item marked "Expired" (Remove only), "Add as new item" button = POST with a new idempotency key (409 → show shortages, config kept)
@@ -131,11 +131,11 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 - [x] Coupon input, totals breakdown (subtotal, each discount + why not, VAT, payable), payment select, Pay (idempotent, disabled while pending)
 - [x] Orders tab + Download orders.json
 - [x] Dev tools footer: "Fail next reserve", "Reset demo data"
-- [ ] Responsive check at 375px — classes reviewed (grid stacks under md, flex-wrap rows, orders table scrolls sideways); user still to check by eye in browser dev tools
+- [x] Responsive check at 375px — classes reviewed (grid stacks under md, flex-wrap rows, orders table scrolls sideways); user confirmed (UI changed by the user)
 - [x] RTL tests: countdown shows server-based time (TC-15), double click Pay (TC-16)
 **Commit(s):** `feat(ui): cart with server-time countdown and atomic edit` · `feat(ui): checkout, orders list and JSON export`
 
-## Step 11 — Assistant, Part F (≈2 h) — TC-18…20 + C2, D5
+## ✅ Step 11 — Assistant, Part F (≈2 h) — TC-18…20 + C2, D5
 - [x] **User writes C2 in DECISIONS.md first** (question → function table)
 - [x] `assistant/stats.ts` + `stats.test.ts` against priced seed
 - [x] `tools.ts`, `systemPrompt.ts`, `gemini.ts`, `errors.ts`, `config.ts`
@@ -146,8 +146,8 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 **Commit:** `feat(assistant): gemini function-calling sales assistant (TC-18..20)`
 
 ## Step 12 — Answers, docs, final check (≈2 h)
-- [ ] `src/answers/answers.test.ts` prints Q1–Q8 (each with `console.log` + assertions)
-- [ ] `ANSWERS.md`: every answer + the command (`npm run answers`) + test name; step-by-step working for Q3 and Q8
+- [x] `src/answers/answers.test.ts` prints Q1–Q8 (each with `console.log` + assertions)
+- [x] `ANSWERS.md`: every answer + the command (`npm run answers`) + test name; step-by-step working for Q3 and Q8
 - [ ] `README.md`: setup, architecture, engines, assistant tools, trade-offs, unfinished, **actual hours**
 - [ ] Re-read DECISIONS.md against the code with the user (prompt 5 in START-HERE). Each answer 3–6 sentences.
 - [ ] `npm test`, `npm run typecheck`, `npm run lint`, `npm run check:hardcode`, `npm run build` all clean
@@ -236,3 +236,5 @@ If behind schedule: never skip tests or DECISIONS. Cut UI polish first, then the
 26 Nov 14:20 — Step 11 part (c): Assistant tab (third Tab; Header 'Sales assistant' button now opens it, aria-pressed, disabled only while menu loads; panel hidden not unmounted so the chat survives). hooks/useAssistant (pendingRef, last 10 text turns as history, today = localDate(serverNow(), shop tz), error → messageFor). components/assistant/ChatPanel (8 example buttons incl. D5, role=log 'Conversation', 'via <tool>' line, missing-key alert, Send disabled with reason). New tc18-20.assistant-ui.test.tsx with a fake Gemini on MSW that phrases only the tool result: TC-18 (6 → 7), TC-19 (= bestSellingOptions, changes after 3×A), TC-20 (no customer tool, prompt forbids names), raw orders never sent, 4 error messages. 220 tests green, build ok. Left in Step 11: user tries a real key + verifies model name, D5.
 26 Nov 14:50 — Gemini live setup: user's key in .env.local (git-ignored). Models list + real calls: gemini-2.5-flash 404 for new keys, gemini-3.5-flash free tier = 20 requests/day (used up in testing), gemini-3.5-flash-lite works (~1 s/tool call) → GEMINI_MODEL = gemini-3.5-flash-lite. gemini.ts: echoes functionCall id, 30 s timeout (AbortController), one retry on 503, new 'busy' message; 429 text mentions the daily limit. Live run through real tools.ts + mock server: 6 orders, BDT 4,995.00, Fried 10, card/bkash/cash split, 3 coupons, best customer → describeData (no name), Bangla question answered in Bangla. User still to try it in the browser (npm run dev).
 26 Nov — User tried the assistant in the browser with the real key (all 9 example answers match stats). D5 written by the user (his Bangla answer; English text pasted into DECISIONS by Claude at his explicit request). Step 11 done except the commit.
+26 Nov — Step 10 and Step 11 marked done (user confirmed the 375px check / UI is his own). Next: Step 12, after the user says go.
+26 Nov 15:35 — Step 12 part (a): src/answers/answers.test.ts (Q1 C max 2 by cheese; Q2 brute force over all 535,680 valid configs → Toast, Fried x2, Tofu = 360.00, ties with +Ketchup, 60 s timeout ~11 s; Q3 A x3 + MORNING15: 10:30 → 1,040, 11:30 → 1,197; Q4 1,600; Q5 total 4,995; Q6 Fried 10; Q7 card 2,145; Q8 3 of 4, ORD-1006 after 11:00). npm run answers uses --silent=false (Vitest 5 hides logs of passing tests). ANSWERS.md written. 232 tests green, typecheck/lint/hardcode clean.
