@@ -25,22 +25,30 @@ export function OptionRow({ option, qty, headroom, onChange }: Props) {
   if (selected) look = 'border-primary/50 bg-selected'
   else if (noStock) look = 'border-line bg-page opacity-70' // nothing chosen, nothing left
 
+  // Phones/tablets: name and "price · stock" on the left, a big stepper on the right.
+  // Desktop (narrow columns): name + price on top, stock pill + small stepper below.
+  // `lg:contents` lets the price and stock spans become grid cells on desktop.
   return (
-    <li className={`min-w-0 rounded-lg border px-2 py-1 transition-colors ${look}`}>
-      <div className="flex items-baseline justify-between gap-1">
-        <p className="min-w-0 text-sm leading-tight font-semibold wrap-break-word text-ink lg:text-[0.78rem]">
-          {option.name}
-        </p>
-        <span className="shrink-0 text-xs text-muted tabular-nums lg:text-[0.7rem]">
+    <li
+      className={`grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 rounded-xl border px-3 py-2 transition-colors lg:gap-x-1 lg:gap-y-0.5 lg:rounded-lg lg:px-2 lg:py-1 ${look}`}
+    >
+      <p className="min-w-0 text-sm leading-tight font-semibold wrap-break-word text-ink lg:text-[0.78rem]">
+        {option.name}
+      </p>
+      <div className="col-start-1 flex flex-wrap items-center gap-x-1 text-xs text-muted lg:contents">
+        <span className="tabular-nums lg:col-start-2 lg:row-start-1 lg:justify-self-end lg:text-[0.7rem]">
           {option.price > 0 ? `+${formatBdt(option.price)}` : 'Free'}
         </span>
-      </div>
-      <div className="mt-0.5 flex flex-wrap items-center justify-between gap-1">
+        <span aria-hidden="true" className="lg:hidden">
+          ·
+        </span>
         <span
-          className={`rounded-full px-1.5 py-0.5 text-xs leading-none font-medium whitespace-nowrap lg:text-[0.65rem] ${noStock ? 'bg-red-50 text-red-700' : 'bg-page text-muted'}`}
+          className={`whitespace-nowrap lg:col-start-1 lg:row-start-2 lg:justify-self-start lg:rounded-full lg:px-1.5 lg:py-0.5 lg:text-[0.65rem] lg:leading-none lg:font-medium ${noStock ? 'font-semibold text-red-700 lg:bg-red-50' : 'lg:bg-page'}`}
         >
           {stockLabel(headroom)}
         </span>
+      </div>
+      <div className="col-start-2 row-span-2 row-start-1 lg:row-span-1 lg:row-start-2">
         <Stepper
           value={qty}
           label={option.name}

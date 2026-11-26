@@ -16,23 +16,28 @@ interface Props {
 }
 
 const iconButton =
-  'relative inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-ink px-3 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+  'relative inline-flex h-10 min-w-10 items-center justify-center gap-2 rounded-xl bg-ink px-3 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
 
 export function Header({ tab, onTab, timeZone, cartCount = 0 }: Props) {
   return (
-    <header className="shrink-0 border-b border-line bg-white">
-      <div className="mx-auto flex max-w-screen-2xl items-center gap-3 px-4 py-2 sm:px-6">
+    // Sticky on phones and tablets (the page scrolls there); on desktop only the middle scrolls.
+    <header className="sticky top-0 z-30 shrink-0 border-b border-line bg-white">
+      <div className="mx-auto flex max-w-screen-2xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2 sm:flex-nowrap sm:px-6">
         <span aria-hidden="true" className="h-9 w-9 shrink-0 rounded-xl bg-yolk shadow-sm" />
-        <h1 className="sr-only text-lg font-bold tracking-tight sm:not-sr-only">Smart Order Builder</h1>
+        <h1 className="min-w-0 truncate text-base font-bold tracking-tight sm:text-lg">Smart Order Builder</h1>
 
+        {/* Phones: the page tabs get their own full-width row under the title. */}
         {tab && onTab && (
-          <nav aria-label="Pages" className="inline-flex rounded-xl bg-page p-1 sm:ml-4">
+          <nav
+            aria-label="Pages"
+            className="order-last flex w-full rounded-xl bg-page p-1 sm:order-none sm:ml-4 sm:inline-flex sm:w-auto"
+          >
             {TABS.map(({ id, label }) => (
               <button
                 key={id}
                 type="button"
                 aria-pressed={tab === id}
-                className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-primary ${tab === id ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'}`}
+                className={`flex-1 rounded-lg px-4 py-1 text-sm sm:py-1.5 sm:flex-none font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-primary ${tab === id ? 'bg-white text-ink shadow-sm' : 'text-muted hover:text-ink'}`}
                 onClick={() => onTab(id)}
               >
                 {label}
@@ -41,7 +46,7 @@ export function Header({ tab, onTab, timeZone, cartCount = 0 }: Props) {
           </nav>
         )}
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-2">
           {timeZone && <ServerClock timeZone={timeZone} />}
           {/* Opens the Assistant page (Part F). Disabled only while the menu is loading. */}
           <button
@@ -61,7 +66,7 @@ export function Header({ tab, onTab, timeZone, cartCount = 0 }: Props) {
           <a
             href="#cart"
             aria-label={`Cart, ${cartCount} items`}
-            className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-white text-ink lg:hidden"
+            className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-white text-ink lg:hidden"
           >
             <span aria-hidden="true">🛒</span>
             {cartCount > 0 && (

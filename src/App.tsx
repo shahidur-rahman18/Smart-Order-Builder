@@ -31,7 +31,7 @@ function Shop({ menu }: { menu: Menu }) {
     <>
       <Header tab={tab} onTab={setTab} timeZone={menu.shop.timeZone} cartCount={cart.cart?.items.length ?? 0} />
 
-      <main className="min-h-0 flex-1 overflow-y-auto lg:overflow-hidden">
+      <main className="flex-1 lg:min-h-0 lg:overflow-hidden">
         {/* Hidden, not removed: a half-built item survives a look at the Orders tab.
             On large screens each column scrolls on its own, so the cart stays in view. */}
         <div
@@ -49,7 +49,7 @@ function Shop({ menu }: { menu: Menu }) {
               onEditDone={finishEdit}
             />
           </div>
-          <div id="cart" className="scroll-mt-4 pb-6 lg:min-h-0 lg:overflow-y-auto lg:pb-0">
+          <div id="cart" className="scroll-mt-32 pb-6 sm:scroll-mt-20 lg:min-h-0 lg:overflow-y-auto lg:pb-0">
             <CartPanel menu={menu} cart={cart} editingId={editingItem?.id ?? null} onEdit={setEditing} />
           </div>
         </div>
@@ -75,8 +75,9 @@ function App() {
   const [resetCount, setResetCount] = useState(0)
 
   return (
-    // Full screen: header and footer stay put, only the middle scrolls.
-    <div className="flex h-dvh flex-col bg-page text-ink">
+    // Phones and tablets: the page scrolls normally (header sticks on top).
+    // Desktop: full screen, header and footer stay put, only the middle scrolls.
+    <div className="flex min-h-dvh flex-col bg-page text-ink lg:h-dvh">
       {menu ? (
         <Shop key={resetCount} menu={menu} />
       ) : (

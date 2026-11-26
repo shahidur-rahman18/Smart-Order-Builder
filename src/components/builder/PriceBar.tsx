@@ -44,7 +44,7 @@ export function PriceBar({ menu, preview, quantity, onQuantity, problemCount, ac
   return (
     <section
       aria-label="Price"
-      className="-mx-4 rounded-t-2xl bg-ink px-4 py-2 text-white shadow-lg sm:mx-0 sm:rounded-2xl"
+      className="-mx-4 rounded-t-2xl bg-ink px-4 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] text-white shadow-[0_-8px_24px_rgba(0,0,0,0.15)] sm:mx-0 sm:rounded-2xl sm:pb-2.5 lg:py-2 lg:shadow-lg"
     >
       {/* Row 1: status on the left, price freshness (or a price error) on the right. */}
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
@@ -59,11 +59,11 @@ export function PriceBar({ menu, preview, quantity, onQuantity, problemCount, ac
           <span className="hidden text-white/60 sm:inline">This item · live price from server</span>
         </div>
         {status === 'error' ? (
-          <div role="alert" className="flex items-center gap-2 text-red-300">
+          <div role="alert" className="flex w-full items-center justify-between gap-2 text-[0.7rem] leading-tight text-red-300 sm:w-auto sm:text-xs">
             <span>{error} Your selection is kept.</span>
             <button
               type="button"
-              className="rounded-md bg-white/10 px-2 py-0.5 font-semibold text-white hover:bg-white/20"
+              className="shrink-0 rounded-md bg-white/10 px-2 py-0.5 font-semibold whitespace-nowrap text-white hover:bg-white/20"
               onClick={retry}
             >
               Retry price
@@ -75,7 +75,7 @@ export function PriceBar({ menu, preview, quantity, onQuantity, problemCount, ac
       </div>
 
       {/* Row 2: breakdown | unit price | quantity | button. One line from lg up. */}
-      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-3 lg:flex-nowrap">
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2.5 lg:flex-nowrap">
         {unit && (
           <dl
             className={`hidden flex-1 grid-cols-4 gap-3 border-r border-white/15 pr-4 text-sm transition-opacity md:grid ${stale ? 'opacity-50' : ''}`}
@@ -90,16 +90,17 @@ export function PriceBar({ menu, preview, quantity, onQuantity, problemCount, ac
           </dl>
         )}
 
-        <div className="flex w-full items-center justify-between gap-3 md:w-auto">
+        {/* Phones: plain big price on the left, quantity on the right. From md: price in a box. */}
+        <div className="flex w-full items-end justify-between gap-3 md:w-auto md:items-center">
           <div
-            className={`rounded-xl border border-primary/60 bg-primary/15 px-3 py-1.5 transition-opacity ${stale ? 'opacity-50' : ''}`}
+            className={`min-w-0 transition-opacity md:rounded-xl md:border md:border-primary/60 md:bg-primary/15 md:px-3 md:py-1.5 ${stale ? 'opacity-50' : ''}`}
           >
             <p className="text-[0.65rem] font-semibold tracking-wider text-orange-200 uppercase">Unit price</p>
-            <p className="text-xl font-bold whitespace-nowrap tabular-nums">
+            <p className="text-2xl font-bold whitespace-nowrap tabular-nums md:text-xl">
               {unit ? `BDT ${formatBdt(unit.unitPrice)}` : '…'}
             </p>
             {unit && (
-              <p className="text-xs text-white/60 md:hidden">
+              <p className="mt-0.5 text-xs text-white/60 md:hidden">
                 Base {formatBdt(unit.base)} · Options +{formatBdt(unit.optionsTotal)}
                 {unit.cheapestFree.discount > 0 && ` · Extras deal −${formatBdt(unit.cheapestFree.discount)}`}
                 {unit.combo.applied && ` · ${comboLabel(menu)} −${formatBdt(unit.combo.discount)}`}
@@ -107,7 +108,9 @@ export function PriceBar({ menu, preview, quantity, onQuantity, problemCount, ac
             )}
           </div>
           <div>
-            <p className="mb-1 text-[0.65rem] font-semibold tracking-wider text-white/50 uppercase">Quantity</p>
+            <p className="mb-1 hidden text-[0.65rem] font-semibold tracking-wider text-white/50 uppercase md:block">
+              Quantity
+            </p>
             <Stepper
               tone="dark"
               compact
@@ -122,8 +125,10 @@ export function PriceBar({ menu, preview, quantity, onQuantity, problemCount, ac
         </div>
 
         <div className="w-full md:w-auto md:min-w-48 lg:w-52 lg:shrink-0">
-          <div className="flex flex-wrap gap-2 [&>button]:flex-1">{actions}</div>
-          <p className="mt-1 text-center text-[0.7rem] leading-tight text-white/60">
+          <div className="flex flex-wrap gap-2 [&>button]:h-11 [&>button]:flex-1 [&>button]:rounded-xl md:[&>button]:h-10 md:[&>button]:rounded-lg [&>button:disabled]:bg-white/10 [&>button:disabled]:text-white/45">
+            {actions}
+          </div>
+          <p className="mt-1 text-center text-[0.7rem] leading-tight text-white/50">
             Line total{' '}
             <output aria-label="Line total" className="tabular-nums">
               {!body || body.lineTotal === null ? '—' : `BDT ${formatBdt(body.lineTotal)}`}

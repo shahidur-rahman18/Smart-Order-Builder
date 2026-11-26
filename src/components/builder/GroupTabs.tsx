@@ -26,7 +26,7 @@ export function GroupTabs({ groups, statuses }: Props) {
             <li key={group.id} className="shrink-0">
               <a
                 href={`#group-${group.id}`}
-                className={`inline-flex h-9 items-center rounded-full border px-3.5 text-sm font-semibold whitespace-nowrap ${LOOK[short]}`}
+                className={`inline-flex h-8 items-center rounded-full border px-3 text-[0.8rem] sm:h-9 sm:px-3.5 sm:text-sm font-semibold whitespace-nowrap ${LOOK[short]}`}
               >
                 {group.name}
                 {MARK[short]}

@@ -28,7 +28,7 @@ export function Stepper({
   tone = 'light',
   compact = false,
 }: Props) {
-  const size = compact ? 'h-8 w-8 lg:h-[22px] lg:w-[22px] lg:rounded-md lg:text-sm' : 'h-9 w-9'
+  const size = compact ? 'h-9 w-9 lg:h-[22px] lg:w-[22px] lg:rounded-md lg:text-sm' : 'h-9 w-9'
   const button = `flex ${size} items-center justify-center rounded-lg border text-lg transition-colors disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${COLOURS[tone]}`
   let numberColour = value > 0 ? 'text-primary' : 'text-muted'
   if (tone === 'dark') numberColour = 'text-white'
@@ -47,7 +47,7 @@ export function Stepper({
       </button>
       <output
         aria-label={valueLabel}
-        className={`${compact ? 'w-6 lg:w-4 lg:text-sm' : 'w-6'} text-center font-bold tabular-nums ${numberColour}`}
+        className={`${compact ? 'w-8 lg:w-4 lg:text-sm' : 'w-8'} text-center font-bold tabular-nums ${numberColour}`}
       >
         {value}
       </output>

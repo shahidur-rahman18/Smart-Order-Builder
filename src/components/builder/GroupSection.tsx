@@ -25,9 +25,9 @@ export function GroupSection({ group, config, status, headroom, onChange }: Prop
       tone={status.hasProblem ? 'warn' : 'plain'}
       // The legend names the group for screen readers; the card title is what people see.
       legend={`${group.name} (${hint})`}
-      className="scroll-mt-16"
+      className="scroll-mt-32 sm:scroll-mt-20 lg:scroll-mt-4"
     >
-      <ul className="grid gap-1">
+      <ul className="grid gap-2 lg:gap-1">
         {group.options.map((option) => (
           <OptionRow
             key={option.id}
